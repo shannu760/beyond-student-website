@@ -20,6 +20,7 @@ export async function GET(request: Request) {
         "Krishna Addanki";
       const avatarUrl =
         user.user_metadata?.avatar_url ||
+        user.user_metadata?.picture ||
         "https://avatars.githubusercontent.com/u/101566537?v=4";
       const githubUsername =
         user.user_metadata?.user_name ||
