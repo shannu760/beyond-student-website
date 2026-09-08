@@ -41,10 +41,44 @@ How can I help you make meaningful academic progress right now?`,
 ];
 
 export default function AIAssistantPage() {
+  const [profile, setProfile] = useState<any>(null);
   const [messages, setMessages] = useState<StudentChatMessage[]>(INITIAL_MESSAGES);
   const [inputQuery, setInputQuery] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.profile) {
+          setProfile(data.profile);
+          const fName = data.profile.fullName ? data.profile.fullName.trim().split(" ")[0] : "Krishna";
+          setMessages([
+            {
+              id: "msg-1",
+              role: "assistant",
+              content: `Hello ${fName}! I'm your **BEYOND AI Student Assistant & Growth Guide**.
+
+I'm loaded with your current student context:
+- 🎓 **Class**: ${data.profile.classLevel || "Class 12"} (AY 2026–27)
+- 🎯 **Target**: ${data.profile.targetExam || "JEE Main 2027"}
+- 🔬 **Current Focus Weak Topic**: Electrostatics & Organic Chemistry Reaction Mechanisms
+
+How can I help you make meaningful academic progress right now?`,
+              timestamp: "10:30 AM",
+              suggestedActions: [
+                "Diagnose My Pathway Alignment",
+                "Explain Work-Energy Theorem",
+                "Create Today's Pomodoro Study Blocks",
+                "Check Reliance Scholarship Checklist",
+              ],
+            },
+          ]);
+        }
+      })
+      .catch((err) => console.error("Error loading profile for AI chat:", err));
+  }, []);
 
   const scrollToBottom = () => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -66,23 +100,23 @@ export default function AIAssistantPage() {
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    if (!textToSend) setInputQuery("");
+    setInputQuery("");
     setIsTyping(true);
 
     try {
       const response = await generateStudentAIResponse(
         query,
         {
-          studentId: "std-001",
-          name: "Arjun Kumar",
-          classLevel: "Class 12",
-          targetExam: "JEE Main",
+          studentId: profile?.id || "student-krishna-addanki-2026",
+          name: profile?.fullName || "Krishna Addanki",
+          classLevel: profile?.classLevel || "Class 12",
+          targetExam: profile?.targetExam || "JEE Main",
           subjects: ["Physics", "Mathematics", "Chemistry"],
           interests: ["Engineering", "Computer Science"],
           weakTopics: ["Electrostatics", "Organic Mechanisms"],
           strongTopics: ["Kinematics", "Vectors"],
-          starsBalance: 1450,
-          streakDays: 12
+          starsBalance: profile?.starsBalance ?? 642,
+          streakDays: profile?.streakDays ?? 1
         },
         messages
       );

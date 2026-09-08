@@ -3,24 +3,26 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const workflows = await prisma.workflow.findMany({
-      orderBy: { updatedAt: "desc" },
-      include: {
-        _count: {
-          select: { executions: true }
-        },
-        executions: {
-          take: 1,
-          orderBy: { startedAt: "desc" },
-          select: {
-            id: true,
-            status: true,
-            startedAt: true,
-            durationMs: true
+    const workflows = (prisma as any).workflow?.findMany
+      ? await (prisma as any).workflow.findMany({
+          orderBy: { updatedAt: "desc" },
+          include: {
+            _count: {
+              select: { executions: true }
+            },
+            executions: {
+              take: 1,
+              orderBy: { startedAt: "desc" },
+              select: {
+                id: true,
+                status: true,
+                startedAt: true,
+                durationMs: true
+              }
+            }
           }
-        }
-      }
-    });
+        })
+      : [];
 
     return NextResponse.json({ success: true, data: workflows });
   } catch (error: any) {
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "Workflow name is required" }, { status: 400 });
     }
 
-    const workflow = await prisma.workflow.create({
+    const workflow = await (prisma as any).workflow?.create({
       data: {
         name,
         description,

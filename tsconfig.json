@@ -25,6 +25,6 @@
       "@designcodeio/threeui/*": ["./src/shaders/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "public/source", "beyond-the-six-face-lattice"]
+  "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "public/source", "beyond-the-six-face-lattice", "beyond first project", "beyond-portfolio", "beyond-with-six-face-lattice-main", "beyond-student-problem-solver", "BEYOND_Portfolio_Website"]
 }

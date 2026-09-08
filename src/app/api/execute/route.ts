@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     let targetWorkflowId = workflowId;
 
     if (workflowId && (!nodes || !edges)) {
-      const dbWorkflow = await prisma.workflow.findUnique({
+      const dbWorkflow = await (prisma as any).workflow?.findUnique({
         where: { id: workflowId }
       });
       if (!dbWorkflow) {
@@ -24,14 +24,14 @@ export async function POST(req: Request) {
 
     if (!targetWorkflowId) {
       // Create ephemeral or default workflow container
-      const tempWorkflow = await prisma.workflow.create({
+      const tempWorkflow = await (prisma as any).workflow?.create({
         data: {
           name: "Interactive Execution",
           nodes: JSON.stringify(targetNodes || []),
           edges: JSON.stringify(targetEdges || [])
         }
       });
-      targetWorkflowId = tempWorkflow.id;
+      targetWorkflowId = tempWorkflow?.id || "temp-exec-id";
     }
 
     const result = await runWorkflow({

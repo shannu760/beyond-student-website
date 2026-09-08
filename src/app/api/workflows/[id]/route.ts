@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
-    const workflow = await prisma.workflow.findUnique({
+    const workflow = await (prisma as any).workflow?.findUnique({
       where: { id: params.id },
       include: {
         executions: {
@@ -37,7 +37,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     if (nodes !== undefined) updateData.nodes = typeof nodes === "string" ? nodes : JSON.stringify(nodes);
     if (edges !== undefined) updateData.edges = typeof edges === "string" ? edges : JSON.stringify(edges);
 
-    const workflow = await prisma.workflow.update({
+    const workflow = await (prisma as any).workflow?.update({
       where: { id: params.id },
       data: updateData
     });
@@ -50,7 +50,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    await prisma.workflow.delete({
+    await (prisma as any).workflow?.delete({
       where: { id: params.id }
     });
 

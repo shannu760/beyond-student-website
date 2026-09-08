@@ -1,6 +1,5 @@
-// Prisma Schema for BEYOND AI Full-Stack Platform
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -8,388 +7,249 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  STUDENT
+  MENTOR
+  ADMIN
+}
+
+enum ExamTarget {
+  JEE_MAIN
+  JEE_ADVANCED
+  NEET_UG
+  CUET
+  BOARDS_ONLY
+  FOUNDATION
+}
+
+enum MasteryLevel {
+  NEEDS_SUPPORT
+  DEVELOPING
+  PROFICIENT
+  STRONG
+  MENTOR_ELIGIBLE
+}
+
+enum Priority {
+  HIGH
+  MEDIUM
+  REVISION
+}
+
+enum BlockStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id            String         @id @default(uuid())
   email         String         @unique
   passwordHash  String
   name          String
-  avatar        String?
-  role          String         @default("USER") // USER, ADMIN
+  avatarUrl     String?
+  role          Role           @default(STUDENT)
+  beyondId      String         @unique
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 
   profile       Profile?
-  memberships   Membership[]
-  generations   Generation[]
-  projects      Project[]
-  automations   Automation[]
-  notifications Notification[]
-  usages        Usage[]
+  studyPlans    StudyPlan[]
+  attempts      AssessmentAttempt[]
+  roomMembers   RoomMember[]
+  starsLedger   StarsLedger[]
+  ideas         Idea[]
+  helpRequests  HelpRequest[]
+  helpAnswers   HelpAnswer[]
 }
 
 model Profile {
-  id              String   @id @default(uuid())
-  userId          String   @unique
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company         String?
-  jobTitle        String?
-  bio             String?
-  website         String?
-  preferencesJson String   @default("{}")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String      @id @default(uuid())
+  userId           String      @unique
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classGrade       Int         @default(12)
+  targetExam       ExamTarget  @default(JEE_MAIN)
+  targetYear       Int         @default(2027)
+  streakDays       Int         @default(0)
+  totalFocusMins   Int         @default(0)
+  stateRegion      String?
+  diagnosticScore  Int         @default(0)
+  interests        String[]    @default([])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
 }
 
-model Organization {
-  id            String         @id @default(uuid())
-  name          String
-  slug          String         @unique
-  logo          String?
-  plan          String         @default("STARTER") // STARTER, PRO, ENTERPRISE
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  memberships   Membership[]
-  brandKits     BrandKit[]
-  projects      Project[]
-  campaigns     Campaign[]
-  assets        Asset[]
-  generations   Generation[]
-  automations   Automation[]
-  agents        Agent[]
-  subscriptions Subscription[]
-  transactions  Transaction[]
-  usages        Usage[]
-  apiKeys       ApiKeyConfig[]
+model Subject {
+  id          String       @id @default(uuid())
+  name        String       @unique
+  chapters    Chapter[]
+  createdAt   DateTime     @default(now())
 }
 
-model Membership {
-  id             String       @id @default(uuid())
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  role           String       @default("MEMBER") // OWNER, ADMIN, MEMBER, VIEWER
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  @@unique([userId, organizationId])
-}
-
-model BrandKit {
-  id              String       @id @default(uuid())
-  organizationId  String
-  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name            String
-  logoUrl         String?
-  primaryColor    String       @default("#00F0FF")
-  secondaryColor  String       @default("#7928CA")
-  accentColor     String       @default("#3B82F6")
-  fontHeading     String       @default("Inter")
-  fontBody        String       @default("Inter")
-  brandVoice      String       @default("Bold, visionary, high-conversion, futuristic")
-  targetAudience  String       @default("Modern businesses, tech startups, e-commerce brands")
-  industry        String       @default("Technology & SaaS")
-  description     String?
-  websiteUrl      String?
-  socialLinksJson String       @default("{}")
-  isDefault       Boolean      @default(false)
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  generations     Generation[]
-}
-
-model Project {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name           String
-  description    String?
-  category       String       @default("GENERAL") // ADS, BANNER, POSTER, VIDEO, BRAND, CAMPAIGN
-  status         String       @default("ACTIVE") // ACTIVE, ARCHIVED, COMPLETED
-  thumbnail      String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  campaigns      Campaign[]
-  generations    Generation[]
-  assets         Asset[]
-}
-
-model Campaign {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  projectId      String?
-  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  name           String
-  objective      String       // SALES, LEADS, AWARENESS, TRAFFIC, ENGAGEMENT
-  targetAudience String
-  budget         Float        @default(0)
-  status         String       @default("ACTIVE") // PLANNING, ACTIVE, PAUSED, COMPLETED
-  platformsJson  String       @default("[]")
-  startDate      DateTime?
-  endDate        DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  generations    Generation[]
-  assets         Asset[]
-}
-
-model Generation {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  projectId      String?
-  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  campaignId     String?
-  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  brandKitId     String?
-  brandKit       BrandKit?    @relation(fields: [brandKitId], references: [id], onDelete: SetNull)
-
-  type           String       // AD, BANNER, POSTER, VIDEO, COPY, BRAND
-  title          String
-  prompt         String
-  settingsJson   String       @default("{}")
-  outputJson     String       // Output payload (variations, copy, layout, media URLs)
-  status         String       @default("COMPLETED") // PENDING, PROCESSING, COMPLETED, FAILED
-  provider       String       @default("SYNTHESIS_ENGINE") // SYNTHESIS_ENGINE, GEMINI, OPENAI
-  tokensUsed     Int          @default(0)
-  creditsCost    Int          @default(1)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  assets         Asset[]
-  prompts        Prompt[]
-}
-
-model Prompt {
-  id           String      @id @default(uuid())
-  generationId String
-  generation   Generation  @relation(fields: [generationId], references: [id], onDelete: Cascade)
-  role         String      @default("user") // system, user, assistant
-  content      String
-  createdAt    DateTime    @default(now())
-}
-
-model Asset {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  projectId      String?
-  project        Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
-  campaignId     String?
-  campaign       Campaign?    @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  generationId   String?
-  generation     Generation?  @relation(fields: [generationId], references: [id], onDelete: SetNull)
-
-  name           String
-  type           String       // IMAGE, VIDEO, SVG, TEXT, AUDIO
-  url            String
-  thumbnail      String?
-  dimensions     String?      // e.g. "1080x1080", "1920x1080"
-  sizeBytes      Int          @default(0)
-  format         String       @default("PNG") // PNG, MP4, SVG, JSON, WEBP
-  tagsJson       String       @default("[]")
-  createdAt      DateTime     @default(now())
-}
-
-model Automation {
-  id                String          @id @default(uuid())
-  organizationId    String
-  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId            String
-  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name              String
-  description       String?
-  triggerType       String          // SCHEDULED, WEBHOOK, ASSET_CREATED, MANUAL
-  triggerConfigJson String          @default("{}")
-  isActive          Boolean         @default(true)
-  stepsJson         String          // Array of workflow steps (triggers, AI generation, filters, actions)
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  runs              AutomationRun[]
-  workflowSteps     WorkflowStep[]
-}
-
-model WorkflowStep {
-  id           String     @id @default(uuid())
-  automationId String
-  automation   Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  stepIndex    Int
-  name         String
-  stepType     String     // TRIGGER, AI_GENERATE, FILTER, EXPORT, NOTIFY
-  configJson   String     @default("{}")
-  createdAt    DateTime   @default(now())
-}
-
-model AutomationRun {
-  id             String     @id @default(uuid())
-  automationId   String
-  automation     Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
-  status         String     @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
-  inputDataJson  String     @default("{}")
-  outputDataJson String     @default("{}")
-  logsJson       String     @default("[]")
-  durationMs     Int        @default(0)
-  createdAt      DateTime   @default(now())
-}
-
-model Agent {
-  id               String     @id @default(uuid())
-  organizationId   String
-  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  name             String
-  role             String
-  avatar           String?
-  description      String?
-  systemPrompt     String
-  capabilitiesJson String     @default("[]")
-  schedule         String?    // e.g. "Every 6 hours", "Daily at 9AM"
-  status           String     @default("ACTIVE") // ACTIVE, PAUSED, IDLE
-  lastRunAt        DateTime?
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-
-  runs             AgentRun[]
-}
-
-model AgentRun {
-  id         String   @id @default(uuid())
-  agentId    String
-  agent      Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
-  task       String
-  status     String   @default("COMPLETED") // RUNNING, COMPLETED, FAILED
-  resultJson String   @default("{}")
-  logsJson   String   @default("[]")
-  createdAt  DateTime @default(now())
-}
-
-model Usage {
-  id                String       @id @default(uuid())
-  organizationId    String
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId            String
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  period            String       // e.g. "2026-08"
-  creditsUsed       Int          @default(0)
-  creditsLimit      Int          @default(1000)
-  generationsCount  Int          @default(0)
-  videosRendered    Int          @default(0)
-  automationsRun    Int          @default(0)
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-
-  @@unique([organizationId, period])
-}
-
-model Subscription {
-  id                 String       @id @default(uuid())
-  organizationId     String
-  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  plan               String       @default("PRO") // STARTER, PRO, ENTERPRISE
-  status             String       @default("ACTIVE") // ACTIVE, PAST_DUE, CANCELED
-  currentPeriodStart DateTime     @default(now())
-  currentPeriodEnd   DateTime
-  cancelAtPeriodEnd  Boolean      @default(false)
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-}
-
-model Transaction {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  amount         Float
-  currency       String       @default("USD")
-  status         String       @default("PAID") // PAID, PENDING, FAILED
-  description    String
-  invoiceUrl     String?
-  createdAt      DateTime     @default(now())
-}
-
-model Notification {
-  id        String   @id @default(uuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title     String
-  message   String
-  type      String   @default("SYSTEM") // SYSTEM, GENERATION_READY, AUTOMATION_COMPLETED, BILLING
-  isRead    Boolean  @default(false)
-  linkUrl   String?
-  createdAt DateTime @default(now())
-}
-
-model ApiKeyConfig {
-  id             String       @id @default(uuid())
-  organizationId String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  provider       String       // GEMINI, OPENAI, ANTHROPIC, REPLICATE
-  keyMasked      String       // e.g. "sk-...ab12"
-  encryptedKey   String       // Base64 or encrypted key
-  isActive       Boolean      @default(true)
-  updatedAt      DateTime     @updatedAt
-
-  @@unique([organizationId, provider])
-}
-
-model Workflow {
-  id          String      @id @default(cuid())
+model Chapter {
+  id          String       @id @default(uuid())
+  subjectId   String
+  subject     Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   name        String
-  description String?
-  active      Boolean     @default(true)
-  triggerType String      @default("manual") // manual, webhook, schedule
-  webhookPath String?     @unique
-  nodes       String      @default("[]") // JSON string of nodes array
-  edges       String      @default("[]") // JSON string of edges array
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  executions  Execution[]
+  topics      Topic[]
+  createdAt   DateTime     @default(now())
 }
 
-model Execution {
-  id            String             @id @default(cuid())
-  workflowId    String
-  workflow      Workflow           @relation(fields: [workflowId], references: [id], onDelete: Cascade)
-  status        String             @default("running") // running, success, error
-  startedAt     DateTime           @default(now())
-  finishedAt    DateTime?
-  durationMs    Int?
-  triggerSource String             @default("manual") // manual, webhook, test
-  initialData   String?            // JSON input
-  resultData    String?            // Final output JSON
-  error         String?
-  logs          ExecutionStepLog[]
+model Topic {
+  id          String       @id @default(uuid())
+  chapterId   String
+  chapter     Chapter      @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  name        String
+  masteries   TopicMastery[]
+  questions   Question[]
+  createdAt   DateTime     @default(now())
 }
 
-model ExecutionStepLog {
-  id          String    @id @default(cuid())
-  executionId String
-  execution   Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
-  nodeId      String
-  nodeName    String
-  nodeType    String
-  status      String    @default("pending") // pending, running, success, error
-  inputData   String?   // JSON input received by this node
-  outputData  String?   // JSON output produced by this node
-  error       String?
-  durationMs  Int?
-  executedAt  DateTime  @default(now())
+model TopicMastery {
+  id             String        @id @default(uuid())
+  userId         String
+  topicId        String
+  topic          Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  accuracy       Float         @default(0.0)
+  questionsTried Int           @default(0)
+  level          MasteryLevel  @default(DEVELOPING)
+  lastAssessedAt DateTime      @default(now())
+
+  @@unique([userId, topicId])
 }
 
-model Credential {
-  id        String   @id @default(cuid())
-  name      String
-  type      String   // nvidia, openai, smtp, webhook, database, custom_header
-  data      String   // JSON string of key-value pairs
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model StudyPlan {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime     @default(now())
+  blocks      StudyBlock[]
+  createdAt   DateTime     @default(now())
 }
 
+model StudyBlock {
+  id               String       @id @default(uuid())
+  studyPlanId      String
+  studyPlan        StudyPlan    @relation(fields: [studyPlanId], references: [id], onDelete: Cascade)
+  subjectName      String
+  topicName        String
+  allocatedMinutes Int          @default(45)
+  completedMinutes Int          @default(0)
+  status           BlockStatus  @default(PLANNED)
+  priority         Priority     @default(HIGH)
+  createdAt        DateTime     @default(now())
+}
+
+model StudyRoom {
+  id              String       @id @default(uuid())
+  name            String
+  topic           String
+  timerMinutes    Int          @default(25)
+  isLive          Boolean      @default(true)
+  maxCapacity     Int          @default(12)
+  members         RoomMember[]
+  createdAt       DateTime     @default(now())
+}
+
+model RoomMember {
+  id              String       @id @default(uuid())
+  roomId          String
+  room            StudyRoom    @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeGoal      String
+  joinedAt        DateTime     @default(now())
+  minutesActive   Int          @default(0)
+
+  @@unique([roomId, userId])
+}
+
+model Assessment {
+  id          String       @id @default(uuid())
+  title       String
+  subjectName String
+  duration    Int          @default(15)
+  questions   Question[]
+  attempts    AssessmentAttempt[]
+  createdAt   DateTime     @default(now())
+}
+
+model Question {
+  id             String       @id @default(uuid())
+  assessmentId   String?
+  assessment     Assessment?  @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  topicId        String?
+  topic          Topic?       @relation(fields: [topicId], references: [id])
+  prompt         String
+  optionsJson    String
+  correctOption  Int
+  explanation    String
+  difficulty     String       @default("MEDIUM")
+}
+
+model AssessmentAttempt {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assessmentId   String
+  assessment     Assessment   @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  score          Int
+  totalQuestions Int
+  accuracy       Float
+  completedAt    DateTime     @default(now())
+}
+
+model StarsLedger {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  reason      String
+  createdAt   DateTime     @default(now())
+}
+
+model Scholarship {
+  id                 String    @id @default(uuid())
+  title              String
+  authority          String
+  supportAmount      String
+  eligibilitySummary String
+  officialSourceUrl  String
+  academicYear       String    @default("AY 2026-27")
+  documentChecklist  String[]
+  deadline           DateTime?
+  createdAt          DateTime  @default(now())
+}
+
+model Idea {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  problem     String
+  solution    String
+  upvotes     Int          @default(0)
+  createdAt   DateTime     @default(now())
+}
+
+model HelpRequest {
+  id          String       @id @default(uuid())
+  userId      String
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  question    String
+  answers     HelpAnswer[]
+  isResolved  Boolean      @default(false)
+  createdAt   DateTime     @default(now())
+}
+
+model HelpAnswer {
+  id            String       @id @default(uuid())
+  helpRequestId String
+  helpRequest   HelpRequest  @relation(fields: [helpRequestId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content       String
+  isHelpfulVote Int          @default(0)
+  createdAt     DateTime     @default(now())
+}

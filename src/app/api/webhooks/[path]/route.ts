@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { path: string } }
 
 async function handleWebhook(req: Request, path: string, method: string) {
   try {
-    const workflow = await prisma.workflow.findFirst({
+    const workflow = await (prisma as any).workflow?.findFirst({
       where: {
         webhookPath: path,
         active: true

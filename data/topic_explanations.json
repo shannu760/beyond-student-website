@@ -1,0 +1,62 @@
+[
+  {
+    "studentId": "student-arjun-kumar-2026",
+    "studentName": "Arjun Kumar",
+    "subject": "Physics",
+    "topicTitle": "Work-Energy Theorem with Variable Forces",
+    "explanationText": "The work done by a variable force F(x) from x1 to x2 is the definite integral W = ∫ F(x) dx. Since F = m(dv/dt) = m*v*(dv/dx), substituting gives W = ∫ m*v dv = (1/2)*m*v2^2 - (1/2)*m*v1^2 = ΔK. This proves the work done by all forces equals the change in kinetic energy.",
+    "id": "exp-1788851473166",
+    "starsEarned": 75,
+    "isVerified": true,
+    "upvotes": 1,
+    "createdAt": "2026-09-08T07:11:13.166Z"
+  },
+  {
+    "id": "exp-1",
+    "studentId": "student-arjun-kumar-2026",
+    "studentName": "Arjun Kumar",
+    "subject": "Physics",
+    "topicTitle": "Moment of Inertia of a Non-Uniform Rod",
+    "explanationText": "To find I about one end when linear density λ = k*x: integrate dI = dm * x^2 = (λ dx) * x^2 = k * x^3 dx from 0 to L. This yields I = (k * L^4) / 4. Since total mass M = ∫ λ dx = (k * L^2)/2, we get k = 2M / L^2. Substituting gives I = (1/2) * M * L^2.",
+    "fileAttachment": {
+      "name": "Non_Uniform_Rod_Integration_Proof.pdf",
+      "size": 1420000,
+      "url": "#",
+      "type": "application/pdf"
+    },
+    "starsEarned": 75,
+    "isVerified": true,
+    "upvotes": 34,
+    "createdAt": "2026-09-08T02:09:28.046Z"
+  },
+  {
+    "id": "exp-2",
+    "studentId": "student-priya-sharma",
+    "studentName": "Priya Sharma",
+    "subject": "Mathematics",
+    "topicTitle": "Leibniz Rule for Differentiation Under Integral Sign",
+    "explanationText": "When differentiating I(x) = ∫_{u(x)}^{v(x)} f(x, t) dt with respect to x: dI/dx = f(x, v(x))*v'(x) - f(x, u(x))*u'(x) + ∫_{u(x)}^{v(x)} ∂f/∂x(x, t) dt. Always remember to multiply by the chain rule derivatives of the upper and lower limits!",
+    "fileAttachment": {
+      "name": "Leibniz_Integral_Rule_Handwritten_Derivation.png",
+      "size": 3200000,
+      "url": "#",
+      "type": "image/png"
+    },
+    "starsEarned": 85,
+    "isVerified": true,
+    "upvotes": 52,
+    "createdAt": "2026-09-07T07:09:28.046Z"
+  },
+  {
+    "id": "exp-3",
+    "studentId": "student-rohit-verma",
+    "studentName": "Rohit Verma",
+    "subject": "Chemistry",
+    "topicTitle": "Crystal Field Splitting in Octahedral Complexes (CFT)",
+    "explanationText": "In an octahedral field, the 5 degenerate d-orbitals split into two sets: lower energy t2g (dxy, dyz, dxz) stabilized by -0.4 Δo and higher energy eg (dx^2-y^2, dz^2) destabilized by +0.6 Δo due to direct electrostatic repulsion along the Cartesian axes.",
+    "starsEarned": 60,
+    "isVerified": true,
+    "upvotes": 28,
+    "createdAt": "2026-09-06T07:09:28.046Z"
+  }
+]

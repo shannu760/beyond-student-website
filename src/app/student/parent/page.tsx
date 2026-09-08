@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Users,
   ShieldCheck,
@@ -13,6 +13,21 @@ import {
 } from "lucide-react";
 
 export default function ParentDashboardPage() {
+  const [profile, setProfile] = useState<any>(null);
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.profile) setProfile(data.profile);
+      })
+      .catch(() => {});
+  }, []);
+
+  const studentName = profile?.fullName || "Krishna Addanki";
+  const classLevel = profile?.classLevel || "Class 12";
+  const targetExam = profile?.targetExam || "JEE Main 2027";
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Header */}
@@ -37,7 +52,7 @@ export default function ParentDashboardPage() {
       <div className="bg-[#252B18] text-[#F3EBDD] rounded-3xl p-6 sm:p-8 border border-[#C8A95B]/30 shadow-xl space-y-4">
         <div className="flex items-center justify-between border-b border-[#69704A]/30 pb-3">
           <span className="text-[10px] font-mono uppercase text-[#C8A95B] font-bold">
-            Student: Arjun Kumar (Class 12 • JEE Main 2027)
+            Student: {studentName} ({classLevel} • {targetExam})
           </span>
           <span className="text-xs font-mono text-emerald-400 font-bold flex items-center gap-1">
             <ShieldCheck className="w-4 h-4 text-emerald-400" /> Active Progress

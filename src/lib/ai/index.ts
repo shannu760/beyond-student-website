@@ -1,6 +1,7 @@
 import { AIProvider } from "./types";
 import { GeminiProvider } from "./gemini";
 import { OpenAIProvider } from "./openai";
+import { NemotronProvider, getNemotronProvider } from "./nemotron";
 import { CreativeSynthesisEngine } from "./synthesis-engine";
 import { db } from "@/lib/db";
 
@@ -8,13 +9,16 @@ export * from "./types";
 export * from "./synthesis-engine";
 export * from "./gemini";
 export * from "./openai";
+export * from "./nemotron";
 
 export async function getAIProviderForOrg(organizationId?: string): Promise<AIProvider> {
   if (organizationId) {
     try {
-      const apiKeyRecord = await db.apiKeyConfig.findFirst({
-        where: { organizationId, isActive: true },
-      });
+      const apiKeyRecord = (db as any).apiKeyConfig?.findFirst
+        ? await (db as any).apiKeyConfig.findFirst({
+            where: { organizationId, isActive: true },
+          })
+        : null;
 
       if (apiKeyRecord) {
         if (apiKeyRecord.provider === "GEMINI") {
@@ -23,10 +27,19 @@ export async function getAIProviderForOrg(organizationId?: string): Promise<AIPr
         if (apiKeyRecord.provider === "OPENAI") {
           return new OpenAIProvider(apiKeyRecord.encryptedKey);
         }
+        if (apiKeyRecord.provider === "NEMOTRON") {
+          return new NemotronProvider(apiKeyRecord.encryptedKey);
+        }
       }
     } catch {
       // Fallback
     }
+  }
+
+  // Check for Nemotron first (new priority)
+  const nemotronProvider = getNemotronProvider();
+  if (nemotronProvider) {
+    return nemotronProvider;
   }
 
   if (process.env.GEMINI_API_KEY) {

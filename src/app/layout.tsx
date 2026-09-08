@@ -1,34 +1,40 @@
 import type { Metadata } from "next";
-import { Lexend } from "next/font/google";
+import { Source_Serif_4, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { CustomCursor } from "@/components/CustomCursor";
 import { SmoothScroll } from "@/components/SmoothScroll";
 
-const lexend = Lexend({
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
-  variable: "--font-lexend",
-  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-serif",
+  weight: ["400", "600", "700"],
+  display: "swap",
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "BEYOND — Shanmukha Krishna | Creative Developer & AI Architect",
-  description: "Personal portfolio of Shanmukha Krishna. Creative developer exploring AI systems, interactive 3D web experiences, WebGL graphics, and digital products.",
+  title: "BEYOND — Academic Growth Network & Student Operating Workspace",
+  description: "A structured, distraction-free academic workspace for serious students connecting syllabus planning, topic diagnostics, quiet study rooms, and verified opportunities.",
   keywords: [
-    "Shanmukha Krishna",
     "BEYOND",
-    "Creative Developer",
-    "AI Architect",
-    "Three.js",
-    "WebGL",
-    "Next.js Portfolio",
-    "3D Web Design",
-    "Generative AI"
+    "Student Growth Network",
+    "JEE Preparation",
+    "NEET Preparation",
+    "Study Rooms",
+    "Academic Guidance",
+    "Topic Mastery",
+    "National Scholarships"
   ],
-  authors: [{ name: "Shanmukha Krishna" }],
+  authors: [{ name: "BEYOND Academic Team" }],
   openGraph: {
-    title: "BEYOND — Shanmukha Krishna | Creative Developer & AI Architect",
-    description: "Building digital experiences beyond the ordinary. Interactive 3D, AI models, and luxury editorial design.",
+    title: "BEYOND — Academic Growth Network & Student Operating Workspace",
+    description: "Build the discipline to know where you stand, and exactly what to study next.",
     type: "website",
     locale: "en_US",
     siteName: "BEYOND",
@@ -49,10 +55,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${lexend.variable}`}>
-      <body className="font-sans bg-[#F3EBDD] text-[#28301D] antialiased selection:bg-[#556B2F] selection:text-[#FAF7EF] has-custom-cursor">
+    <html lang="en" className={`${sourceSerif.variable} ${plusJakarta.variable}`}>
+      <body className="font-sans bg-[#F7F5F0] text-[#1A2219] antialiased selection:bg-[#283826] selection:text-[#F7F5F0]">
         <SmoothScroll>
-          <CustomCursor />
           {children}
         </SmoothScroll>
       </body>

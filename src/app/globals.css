@@ -4,33 +4,195 @@
 
 @layer base {
   :root {
-    --color-olive-primary: #556B2F;
-    --color-olive-deep: #6B7A3A;
-    --color-beige-warm: #F3EBDD;
-    --color-beige-soft: #E8DDC8;
-    --color-text-dark: #28301D;
-    --color-text-muted: #6F735F;
-    --color-beige-light: #FAF7EF;
+    --color-parchment: #F7F5F0;
+    --color-surface: #F0EDE4;
+    --color-olive-primary: #283826;
+    --color-olive-deep: #364A33;
+    --color-sage: #6C7D64;
+    --color-ochre: #B07D4F;
+    --color-border: #E1DDD2;
+    --color-ink-dark: #1A2219;
+    --color-ink-muted: #556052;
   }
 
   html {
-    background-color: var(--color-beige-warm);
-    color: var(--color-text-dark);
+    background-color: var(--color-parchment);
+    color: var(--color-ink-dark);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
   }
 
   body {
-    background-color: #F3EBDD;
-    color: #28301D;
+    background-color: #F7F5F0;
+    color: #1A2219;
     overflow-x: hidden;
-    selection-background-color: #556B2F;
-    selection-color: #FAF7EF;
+    selection-background-color: #283826;
+    selection-color: #F7F5F0;
+    font-family: var(--font-sans), "Plus Jakarta Sans", sans-serif;
+  }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: var(--font-serif), "Source Serif 4", Georgia, serif;
+    letter-spacing: -0.015em;
   }
 
   ::selection {
-    background-color: #556B2F;
-    color: #FAF7EF;
+    background-color: #283826;
+    color: #F7F5F0;
   }
+}
+
+/* Scroll Reading Progress Bar (Top Fixed) */
+#scroll-reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #283826 0%, #6C7D64 45%, #B07D4F 100%);
+  transform-origin: 0 50%;
+  z-index: 9999;
+  pointer-events: none;
+  transform: scaleX(0);
+}
+
+@keyframes grow-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    #scroll-reading-progress {
+      animation: grow-progress auto linear;
+      animation-timeline: scroll();
+    }
+  }
+}
+
+/* Hardware-Accelerated Smooth Scroll-Reveal Classes */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-reveal-scale {
+  opacity: 0;
+  transform: scale(0.96) translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-scale.is-revealed {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+.scroll-reveal-left {
+  opacity: 0;
+  transform: translateX(-28px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-left.is-revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.scroll-reveal-right {
+  opacity: 0;
+  transform: translateX(28px);
+  transition: opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1), transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-right.is-revealed {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Stagger Delays */
+.delay-100 { transition-delay: 100ms; }
+.delay-200 { transition-delay: 200ms; }
+.delay-300 { transition-delay: 300ms; }
+.delay-400 { transition-delay: 400ms; }
+.delay-500 { transition-delay: 500ms; }
+
+/* Staggered Children */
+.scroll-reveal-stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-reveal-stagger.is-revealed > *:nth-child(1) { transition-delay: 60ms; opacity: 1; transform: translateY(0); }
+.scroll-reveal-stagger.is-revealed > *:nth-child(2) { transition-delay: 130ms; opacity: 1; transform: translateY(0); }
+.scroll-reveal-stagger.is-revealed > *:nth-child(3) { transition-delay: 200ms; opacity: 1; transform: translateY(0); }
+.scroll-reveal-stagger.is-revealed > *:nth-child(4) { transition-delay: 270ms; opacity: 1; transform: translateY(0); }
+.scroll-reveal-stagger.is-revealed > *:nth-child(5) { transition-delay: 340ms; opacity: 1; transform: translateY(0); }
+.scroll-reveal-stagger.is-revealed > *:nth-child(6) { transition-delay: 410ms; opacity: 1; transform: translateY(0); }
+
+/* Native CSS View-Timeline Progressive Enhancement */
+@media (prefers-reduced-motion: no-preference) {
+  @supports ((animation-timeline: view()) and (animation-range: entry)) {
+    .native-scroll-reveal {
+      animation: native-scroll-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 25%;
+    }
+  }
+}
+
+@keyframes native-scroll-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Accessibility: respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-scale,
+  .scroll-reveal-left,
+  .scroll-reveal-right,
+  .scroll-reveal-stagger > *,
+  .native-scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Authentic physical paper & linen tactile texture */
+.paper-texture {
+  background-color: #F7F5F0;
+  background-image: 
+    radial-gradient(#283826 0.75px, transparent 0.75px),
+    radial-gradient(#6C7D64 0.5px, #F7F5F0 0.5px);
+  background-size: 24px 24px, 12px 12px;
+  background-position: 0 0, 12px 12px;
+  background-attachment: fixed;
+}
+
+.linen-card {
+  background-color: #FAF8F5;
+  border: 1px solid #E1DDD2;
+  box-shadow: 0 1px 3px rgba(40, 56, 38, 0.04);
 }
 
 /* Lenis smooth scroll engine support */
