@@ -34,7 +34,11 @@ import {
   FileCheck,
   Check,
   X,
-  Crown
+  Crown,
+  Camera,
+  Upload,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import Image from "next/image";
 import { supabase } from "@/lib/supabase";
@@ -196,6 +200,100 @@ export default function StudentProfilePage() {
   const [editTargetExam, setEditTargetExam] = useState("JEE Main & Advanced 2027");
   const [isSavingGoal, setIsSavingGoal] = useState(false);
   const [resettingRecords, setResettingRecords] = useState(false);
+
+  // Photo upload states & handlers
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoFeedback, setPhotoFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setPhotoFeedback({
+        type: "error",
+        message: "File size exceeds 10 MB limit. Please select an image under 10 MB.",
+      });
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    setPhotoFeedback(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.file?.url) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      const uploadedUrl = data.file.url;
+
+      // Update student profile with new avatar URL
+      const profRes = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: uploadedUrl }),
+      });
+
+      const profData = await profRes.json();
+      if (profData?.profile) {
+        setProfile(profData.profile);
+      } else {
+        setProfile((prev) => (prev ? { ...prev, avatarUrl: uploadedUrl } : prev));
+      }
+
+      window.dispatchEvent(new Event("beyond:activity-updated"));
+
+      setPhotoFeedback({
+        type: "success",
+        message: "Profile photo successfully updated from device!",
+      });
+
+      setTimeout(() => setPhotoFeedback(null), 4000);
+    } catch (err: any) {
+      setPhotoFeedback({
+        type: "error",
+        message: err.message || "Failed to upload photo. Please try again.",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+      if (e.target) e.target.value = "";
+    }
+  };
+
+  const handleResetAvatar = async () => {
+    try {
+      setIsUploadingPhoto(true);
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: "/images/default-avatar.svg" }),
+      });
+      const data = await res.json();
+      if (data?.profile) {
+        setProfile(data.profile);
+      }
+      window.dispatchEvent(new Event("beyond:activity-updated"));
+      setPhotoFeedback({
+        type: "success",
+        message: "Profile avatar reset to official BEYOND monogram.",
+      });
+      setTimeout(() => setPhotoFeedback(null), 3000);
+    } catch {
+      // ignore
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
 
   // Fetch all live data
   const loadAllStudentData = useCallback(async () => {
@@ -487,10 +585,51 @@ export default function StudentProfilePage() {
       <div className="bg-[#283826] text-[#F7F5F0] rounded-3xl p-6 sm:p-8 border border-[#364A33] shadow-xl relative overflow-hidden space-y-6">
         <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-radial from-[#B07D4F]/25 via-[#364A33]/30 to-transparent blur-3xl pointer-events-none" />
 
+        {/* Hidden File Input for Phone Camera & PC Upload */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handlePhotoUpload}
+          accept="image/png,image/jpeg,image/jpg,image/webp"
+          className="hidden"
+        />
+
+        {/* Photo Upload Feedback Notification */}
+        {photoFeedback && (
+          <div
+            className={`p-3 rounded-xl border text-xs font-mono flex items-center justify-between gap-2 animate-in fade-in duration-200 relative z-20 ${
+              photoFeedback.type === "success"
+                ? "bg-emerald-950/80 border-emerald-500/60 text-emerald-200"
+                : "bg-rose-950/80 border-rose-500/60 text-rose-200"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {photoFeedback.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              ) : (
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+              )}
+              <span>{photoFeedback.message}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setPhotoFeedback(null)}
+              className="text-white/60 hover:text-white p-0.5"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4 sm:gap-5">
-            <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-[#F0EDE4] text-[#283826] font-bold text-3xl flex items-center justify-center border-2 border-[#B07D4F] shadow-lg font-mono overflow-hidden">
+            <div className="relative group">
+              {/* Clickable Avatar Container */}
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-[#F0EDE4] text-[#283826] font-bold text-3xl flex items-center justify-center border-2 border-[#B07D4F] shadow-lg font-mono overflow-hidden relative cursor-pointer group-hover:border-white transition-all"
+                title="Click to upload profile photo from your phone or computer"
+              >
                 {profile?.avatarUrl ? (
                   <img 
                     src={profile.avatarUrl || "/images/default-avatar.svg"} 
@@ -503,10 +642,44 @@ export default function StudentProfilePage() {
                 ) : (
                   studentInitials
                 )}
+
+                {/* Hover overlay with camera icon */}
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-opacity">
+                  {isUploadingPhoto ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-[#C8A95B]" />
+                  ) : (
+                    <>
+                      <Camera className="w-5 h-5 text-[#C8A95B]" />
+                      <span className="text-[9px] font-mono mt-1 font-bold">Change</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Active Uploading Spinner Overlay */}
+                {isUploadingPhoto && (
+                  <div className="absolute inset-0 bg-black/75 flex flex-col items-center justify-center text-white gap-1 z-20">
+                    <Loader2 className="w-6 h-6 animate-spin text-[#C8A95B]" />
+                    <span className="text-[9px] font-mono">Uploading...</span>
+                  </div>
+                )}
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#283826] flex items-center justify-center text-white" title="Active Verified Profile">
+
+              {/* Active Verified Checkmark Badge */}
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#283826] flex items-center justify-center text-white z-10" title="Active Verified Profile">
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </div>
+
+              {/* Camera Trigger Badge for Quick Mobile Tap */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingPhoto}
+                className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-[#B07D4F] hover:bg-[#C8A95B] border-2 border-[#283826] flex items-center justify-center text-white shadow-md transition-transform hover:scale-110 cursor-pointer z-10"
+                title="Upload photo from phone or computer"
+                aria-label="Upload profile photo"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             <div className="space-y-1">
@@ -567,6 +740,41 @@ export default function StudentProfilePage() {
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                     GitHub OAuth Active
                   </span>
+                )}
+              </div>
+
+              {/* Photo Upload & Reset Quick Buttons */}
+              <div className="flex flex-wrap items-center gap-2 pt-1.5 text-xs text-[#F0EDE4]/90">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#364A33] hover:bg-[#455D41] border border-[#6C7D64]/70 text-white font-mono text-[11px] font-semibold transition-all shadow-xs cursor-pointer"
+                >
+                  {isUploadingPhoto ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-[#C8A95B]" />
+                      <span>Uploading Photo...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="w-3.5 h-3.5 text-[#C8A95B]" />
+                      <span>Upload Photo (Phone / PC)</span>
+                    </>
+                  )}
+                </button>
+
+                {profile?.avatarUrl && profile.avatarUrl !== "/images/default-avatar.svg" && (
+                  <button
+                    type="button"
+                    onClick={handleResetAvatar}
+                    disabled={isUploadingPhoto}
+                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-black/25 hover:bg-black/40 text-[#F0EDE4]/80 text-[11px] font-mono transition-colors cursor-pointer border border-white/10"
+                    title="Reset to default monogram avatar"
+                  >
+                    <RotateCcw className="w-3 h-3 text-[#C8A95B]" />
+                    <span>Reset Avatar</span>
+                  </button>
                 )}
               </div>
             </div>

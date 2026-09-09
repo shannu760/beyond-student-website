@@ -12,7 +12,10 @@ import {
   UserCheck, 
   ArrowRight,
   Database,
-  Lock
+  Lock,
+  Camera,
+  Upload,
+  Loader2
 } from "lucide-react";
 
 interface AuthModalProps {
@@ -29,6 +32,61 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
   const [customEmail, setCustomEmail] = useState("krishna.addanki633@gmail.com");
   const [customName, setCustomName] = useState("Krishna Addanki");
   const [activeUser, setActiveUser] = useState<any>(currentProfile || null);
+  const authFileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+
+  const handleAuthPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setErrorMessage("Photo size exceeds 10 MB limit.");
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    setErrorMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success || !data.file?.url) {
+        throw new Error(data.error || "Failed to upload image");
+      }
+
+      const uploadedUrl = data.file.url;
+
+      const profRes = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatarUrl: uploadedUrl }),
+      });
+
+      const profData = await profRes.json();
+      if (profData?.profile) {
+        setActiveUser(profData.profile);
+        if (onAuthSuccess) onAuthSuccess(profData.profile);
+      } else {
+        setActiveUser((prev: any) => (prev ? { ...prev, avatarUrl: uploadedUrl } : prev));
+      }
+
+      window.dispatchEvent(new Event("beyond:activity-updated"));
+      setSuccessMessage("Profile photo updated successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to upload photo");
+    } finally {
+      setIsUploadingAvatar(false);
+      if (e.target) e.target.value = "";
+    }
+  };
 
   useEffect(() => {
     if (currentProfile) {
@@ -273,15 +331,49 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
           {/* Current Active Account Card */}
           {activeUser && (
             <div className="p-4 rounded-lg bg-[#EFECE3] border border-[#DDD7C8] flex items-center justify-between">
+              {/* Hidden file input for mobile camera or PC file picker */}
+              <input
+                type="file"
+                ref={authFileInputRef}
+                onChange={handleAuthPhotoUpload}
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                className="hidden"
+              />
+
               <div className="flex items-center gap-3">
-                <img
-                  src={activeUser.avatarUrl || "/images/default-avatar.svg"}
-                  alt={activeUser.fullName}
-                  className="w-12 h-12 rounded-full border-2 border-[#283826] object-cover shadow-2xs"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
-                  }}
-                />
+                <div 
+                  className="relative group cursor-pointer shrink-0" 
+                  onClick={() => authFileInputRef.current?.click()} 
+                  title="Click to upload profile photo from phone or computer"
+                >
+                  <img
+                    src={activeUser.avatarUrl || "/images/default-avatar.svg"}
+                    alt={activeUser.fullName}
+                    className="w-12 h-12 rounded-full border-2 border-[#283826] object-cover shadow-2xs group-hover:brightness-90 transition-all"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                    }}
+                  />
+                  <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                    {isUploadingAvatar ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-[#C8A95B]" />
+                    ) : (
+                      <Camera className="w-4 h-4 text-[#C8A95B]" />
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      authFileInputRef.current?.click();
+                    }}
+                    className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#B07D4F] border border-white flex items-center justify-center text-white shadow-2xs cursor-pointer hover:bg-[#C8A95B]"
+                    title="Upload photo"
+                  >
+                    <Camera className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="text-sm font-bold text-[#1A2219]">{activeUser.fullName}</span>
@@ -295,9 +387,20 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
                     </span>
                   </div>
                   <p className="text-xs text-[#5E685B] font-mono">{activeUser.email}</p>
-                  <p className="text-[11px] text-[#6C7D64] mt-0.5">
-                    {activeUser.targetExam || "JEE Main & SAT"} • {activeUser.starsBalance ?? 642} Stars
-                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-[11px] text-[#6C7D64]">
+                      {activeUser.targetExam || "JEE Main & SAT"} • {activeUser.starsBalance ?? 642} Stars
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => authFileInputRef.current?.click()}
+                      disabled={isUploadingAvatar}
+                      className="text-[10px] font-mono font-semibold text-[#B07D4F] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <Camera className="w-2.5 h-2.5" />
+                      <span>{isUploadingAvatar ? "Uploading..." : "Change Photo"}</span>
+                    </button>
+                  </div>
                 </div>
               </div>
               <button
