@@ -95,7 +95,7 @@ beyond-the-ai-kompany/
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/beyond-portfolio.git
+   git clone https://github.com/shannu760/beyond-portfolio.git
    cd beyond-portfolio
    ```
 
