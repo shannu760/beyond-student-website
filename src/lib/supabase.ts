@@ -24,6 +24,10 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
+export const SUPABASE_CALLBACK_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_CALLBACK_URL ||
+  `${supabaseUrl}/auth/v1/callback`;
+
 export function getSupabaseClient() {
   return supabase;
 }

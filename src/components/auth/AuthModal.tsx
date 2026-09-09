@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, SUPABASE_CALLBACK_URL } from "@/lib/supabase";
 import { 
   X, 
   CheckCircle2, 
@@ -493,7 +493,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
           </form>
 
           {/* Database & Cloud Security Ledger Info */}
-          <div className="p-3 rounded-lg bg-[#EAE6DB] border border-[#DDD7C8] text-[11px] text-[#556052] space-y-1.5 font-sans">
+          <div className="p-3 rounded-lg bg-[#EAE6DB] border border-[#DDD7C8] text-[11px] text-[#556052] space-y-2 font-sans">
             <div className="flex items-center gap-1.5 font-semibold text-[#283826]">
               <Database className="w-3.5 h-3.5 text-[#283826]" />
               <span>Real-Time Cloud Ledger & Record Preservation</span>
@@ -501,6 +501,12 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
             <p>
               Your Google identity is securely synchronized with Supabase database (<code className="font-mono text-[10px] text-[#283826]">fzqdcsxmhndhgkemrpem.supabase.co</code>). All MCQs, PYQs, and focus records are persistently preserved across sessions.
             </p>
+            <div className="pt-1.5 border-t border-[#DDD7C8] flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[10px]">
+              <span className="text-[#6C7D64] font-medium">Supabase OAuth Callback Link:</span>
+              <code className="font-mono text-[10px] text-[#283826] bg-[#DDD7C8]/60 px-2 py-0.5 rounded select-all font-semibold break-all">
+                {SUPABASE_CALLBACK_URL}
+              </code>
+            </div>
           </div>
         </div>
 
