@@ -366,16 +366,16 @@ export function SyllabusAndNTATracker() {
                 setSearchQuery("");
               }}
               className={`
-                px-5 py-2.5 rounded text-xs font-mono font-bold transition-all flex items-center gap-2 border
+                tab-pill px-5 py-2.5 rounded text-xs font-mono font-bold flex items-center gap-2 border cursor-pointer
                 ${
                   selectedExamId === exam.id
-                    ? "bg-[#283826] text-[#F7F5F0] border-[#283826] shadow-xs"
+                    ? "bg-[#283826] text-[#F7F5F0] border-[#283826] shadow-sm"
                     : "bg-[#FAF8F5] text-[#556052] border-[#E1DDD2] hover:border-[#283826] hover:text-[#1A2219]"
                 }
               `}
             >
               <span>{exam.examName}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded ${
+              <span className={`text-[10px] px-1.5 py-0.2 rounded transition-colors ${
                 selectedExamId === exam.id ? "bg-[#364A33] text-emerald-200" : "bg-[#F0EDE4] text-[#283826]"
               }`}>
                 {exam.domains.length} Units
@@ -384,8 +384,10 @@ export function SyllabusAndNTATracker() {
           ))}
         </div>
 
-        {/* Current Exam Overview Card */}
-        <div className="p-6 rounded bg-[#F0EDE4] border border-[#E1DDD2] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Tab Content Pane with Smooth Fade-Slide */}
+        <div key={selectedExamId} className="space-y-6 tab-pane-transition">
+          {/* Current Exam Overview Card */}
+          <div className="p-6 rounded bg-[#F0EDE4] border border-[#E1DDD2] flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <span className="text-[10px] uppercase font-mono font-bold text-[#6C7D64]">
               Conducting Body: {currentExam.conductingBody}
@@ -463,6 +465,7 @@ export function SyllabusAndNTATracker() {
           ))}
         </div>
 
+        </div>
       </div>
     </section>
   );

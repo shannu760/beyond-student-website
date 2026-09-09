@@ -314,7 +314,7 @@ Verified Application Ledger 2026–27`;
               key={cat}
               type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+              className={`tab-pill px-3.5 py-1.5 rounded-lg text-xs font-mono font-bold cursor-pointer ${
                 selectedCategory === cat
                   ? "bg-[#283826] text-[#F7F5F0] shadow-xs"
                   : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2]"
@@ -325,8 +325,8 @@ Verified Application Ledger 2026–27`;
           ))}
         </div>
 
-        {/* Scheme Selector Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Scheme Selector Cards with Smooth Transition */}
+        <div key={selectedCategory} className="grid grid-cols-1 md:grid-cols-3 gap-4 tab-pane-transition">
           {filteredSchemes.map((scheme) => {
             const isSelected = scheme.id === current.id;
             const isTracked = trackedSchemes[scheme.id];
@@ -336,7 +336,7 @@ Verified Application Ledger 2026–27`;
                 key={scheme.id}
                 type="button"
                 onClick={() => setSelectedSchemeId(scheme.id)}
-                className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
+                className={`tab-pill p-4 rounded-xl border text-left flex flex-col justify-between space-y-3 cursor-pointer ${
                   isSelected
                     ? "bg-[#FAF8F5] border-[#283826] shadow-md ring-1 ring-[#283826]"
                     : "bg-[#FAF8F5] hover:bg-[#F0EDE4] border-[#E1DDD2] text-[#1A2219]"
@@ -348,37 +348,30 @@ Verified Application Ledger 2026–27`;
                       {scheme.sourceType}
                     </span>
                     {isTracked && (
-                      <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold flex items-center gap-0.5">
-                        <Check className="w-2.5 h-2.5" />
-                        Tracked
+                      <span className="text-emerald-700 font-bold flex items-center gap-0.5">
+                        <Check className="w-3 h-3" /> Tracked
                       </span>
                     )}
                   </div>
-
-                  <h3 className="font-serif font-bold text-sm text-[#1A2219] line-clamp-2">
+                  <h4 className="font-serif font-bold text-sm text-[#1A2219] line-clamp-2">
                     {scheme.title}
-                  </h3>
-
-                  <p className="text-[11px] text-[#6C7D64] font-mono mt-1 truncate">
-                    {scheme.authority}
+                  </h4>
+                  <p className="text-xs text-[#556052] mt-1 line-clamp-2 font-sans">
+                    {scheme.eligibilitySummary}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-[#E1DDD2] flex items-center justify-between text-xs">
-                  <span className="font-bold text-[#B07D4F] font-mono">
-                    {scheme.supportAmount.split("•")[0]}
-                  </span>
-                  <span className="text-[10px] font-mono text-[#556052]">
-                    {scheme.studentMatchPercent}% Match
-                  </span>
+                <div className="pt-2 border-t border-[#E1DDD2] flex items-center justify-between text-[11px] font-mono">
+                  <span className="text-[#B07D4F] font-bold">{scheme.supportAmount}</span>
+                  <span className="text-[#283826] font-bold">{scheme.studentMatchPercent}% Match</span>
                 </div>
               </button>
             );
           })}
         </div>
 
-        {/* Detailed Scheme Breakdown & Action Box */}
-        <div className="bg-[#FAF8F5] rounded-xl border border-[#D5CFBE] p-6 sm:p-8 space-y-6 shadow-xs">
+        {/* Detailed Scheme Breakdown & Action Box with Smooth Transition */}
+        <div key={current.id} className="bg-[#FAF8F5] rounded-xl border border-[#D5CFBE] p-6 sm:p-8 space-y-6 shadow-xs tab-pane-transition">
           
           {/* Header Info */}
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-4 border-b border-[#E1DDD2]">

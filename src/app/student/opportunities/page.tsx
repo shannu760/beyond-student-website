@@ -142,7 +142,7 @@ export default function OpportunitiesPage() {
               <div
                 key={sch.id}
                 onClick={() => setSelectedScholarship(sch)}
-                className={`p-4 rounded-2xl border transition-all cursor-pointer space-y-2 ${
+                className={`tab-pill p-4 rounded-2xl border cursor-pointer space-y-2 ${
                   isSelected
                     ? "bg-[#252B18] text-[#F3EBDD] border-[#C8A95B] shadow-md"
                     : "bg-[#F8F4EC] text-[#252B18] border-[#3D4425]/20 hover:border-[#3D4425]"
@@ -174,9 +174,9 @@ export default function OpportunitiesPage() {
           })}
         </div>
 
-        {/* Selected Scholarship Detail View */}
+        {/* Selected Scholarship Detail View with Smooth Transition */}
         {selectedScholarship && (
-          <div className="lg:col-span-2 bg-[#F8F4EC] border border-[#3D4425]/20 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm">
+          <div key={selectedScholarship.id} className="lg:col-span-2 bg-[#F8F4EC] border border-[#3D4425]/20 rounded-3xl p-6 sm:p-8 space-y-6 shadow-sm tab-pane-transition">
             <div className="border-b border-[#3D4425]/15 pb-4 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-mono uppercase tracking-widest text-[#3D4425] font-bold">

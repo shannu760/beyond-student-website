@@ -101,7 +101,7 @@ export function CuratedVideosSection() {
                   key={ex}
                   type="button"
                   onClick={() => setSelectedExam(ex)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-all cursor-pointer ${
+                  className={`tab-pill px-3 py-1.5 rounded-lg text-xs font-bold font-mono cursor-pointer ${
                     selectedExam === ex
                       ? "bg-[#283826] text-[#F7F5F0] shadow-xs"
                       : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2]"
@@ -135,9 +135,9 @@ export function CuratedVideosSection() {
                   key={lvl}
                   type="button"
                   onClick={() => setSelectedLevel(lvl)}
-                  className={`px-2.5 py-1 rounded text-xs transition-colors ${
+                  className={`tab-pill px-2.5 py-1 rounded text-xs cursor-pointer ${
                     selectedLevel === lvl
-                      ? "bg-[#B07D4F] text-white font-bold"
+                      ? "bg-[#B07D4F] text-white font-bold shadow-xs"
                       : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2]"
                   }`}
                 >
@@ -154,9 +154,9 @@ export function CuratedVideosSection() {
                   key={lang}
                   type="button"
                   onClick={() => setSelectedLanguage(lang)}
-                  className={`px-2.5 py-1 rounded text-xs transition-colors ${
+                  className={`tab-pill px-2.5 py-1 rounded text-xs cursor-pointer ${
                     selectedLanguage === lang
-                      ? "bg-[#283826] text-white font-bold"
+                      ? "bg-[#283826] text-white font-bold shadow-xs"
                       : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2]"
                   }`}
                 >
@@ -168,8 +168,8 @@ export function CuratedVideosSection() {
 
         </div>
 
-        {/* Video Cards Grid with Staggered Scroll Reveal */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 scroll-reveal-stagger">
+        {/* Video Cards Grid with Smooth Transition */}
+        <div key={`${selectedExam}-${selectedLanguage}-${selectedLevel}`} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 tab-pane-transition">
           {filteredVideos.map((video) => (
             <div
               key={video.id}

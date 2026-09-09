@@ -244,7 +244,7 @@ export default function ExamsQuizPage() {
                 <button
                   key={f.id}
                   onClick={() => setSelectedExamFilter(f.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+                  className={`tab-pill px-3 py-1.5 rounded-xl text-xs font-mono font-bold cursor-pointer ${
                     selectedExamFilter === f.id
                       ? "bg-[#252B18] text-[#F3EBDD] shadow-2xs"
                       : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2]"
@@ -260,8 +260,8 @@ export default function ExamsQuizPage() {
             </span>
           </div>
 
-          {/* Curated Papers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Curated Papers Grid with Smooth Transition */}
+          <div key={selectedExamFilter} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 tab-pane-transition">
             {filteredCuratedPapers.map((paper) => (
               <div
                 key={paper.id}

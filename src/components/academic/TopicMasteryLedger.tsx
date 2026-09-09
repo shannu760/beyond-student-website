@@ -66,10 +66,10 @@ export function TopicMasteryLedger() {
                 key={tab}
                 onClick={() => setSelectedSubject(tab)}
                 className={`
-                  px-3 py-1 text-xs font-mono font-bold rounded transition-colors
+                  tab-pill px-3 py-1 text-xs font-mono font-bold rounded cursor-pointer
                   ${
                     selectedSubject === tab
-                      ? "bg-[#283826] text-[#F7F5F0]"
+                      ? "bg-[#283826] text-[#F7F5F0] shadow-xs"
                       : "text-[#556052] hover:text-[#1A2219]"
                   }
                 `}
@@ -92,8 +92,8 @@ export function TopicMasteryLedger() {
             <div className="col-span-2 text-right">Recommended Action</div>
           </div>
 
-          {/* Table Rows */}
-          <div className="divide-y divide-[#E1DDD2]">
+          {/* Table Rows with Smooth Transition */}
+          <div key={selectedSubject} className="divide-y divide-[#E1DDD2] tab-pane-transition">
             {filteredItems.map((item) => (
               <div
                 key={item.id}

@@ -435,7 +435,7 @@ export default function PYQPortalPage() {
                 setActiveTab("12thpass");
                 setActiveJumbledPaper(null);
               }}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`tab-pill px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "12thpass"
                   ? "bg-[#283826] text-[#F7F5F0] shadow-2xs"
                   : "text-[#556052] hover:text-[#1A2219]"
@@ -451,7 +451,7 @@ export default function PYQPortalPage() {
                 setActiveTab("neet");
                 setActiveJumbledPaper(null);
               }}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`tab-pill px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "neet"
                   ? "bg-[#283826] text-[#F7F5F0] shadow-2xs"
                   : "text-[#556052] hover:text-[#1A2219]"
@@ -467,7 +467,7 @@ export default function PYQPortalPage() {
                 setActiveTab("archive");
                 setActiveJumbledPaper(null);
               }}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+              className={`tab-pill px-3 py-1.5 rounded-lg cursor-pointer ${
                 activeTab === "archive"
                   ? "bg-[#283826] text-[#F7F5F0] shadow-2xs"
                   : "text-[#556052] hover:text-[#1A2219]"
@@ -478,7 +478,7 @@ export default function PYQPortalPage() {
 
             <button
               onClick={() => setActiveTab("jumbled")}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+              className={`tab-pill px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1 ${
                 activeTab === "jumbled"
                   ? "bg-[#283826] text-[#F7F5F0] shadow-2xs"
                   : "text-[#556052] hover:text-[#1A2219]"
@@ -498,7 +498,7 @@ export default function PYQPortalPage() {
         {/* TAB 1: 12THPASS.AI DUMP (13,805 QUESTIONS SEGREGATED) */}
         {/* ========================================================================= */}
         {activeTab === "12thpass" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6 tab-pane-transition">
             
             {/* Banner Area */}
             <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#ECE7DC] to-[#E3DEC9] border border-[#D5CFBE] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -553,7 +553,7 @@ export default function PYQPortalPage() {
                           setPassChapter("all");
                           setPassPage(1);
                         }}
-                        className={`px-4 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-2 ${
+                        className={`tab-pill px-4 py-2 rounded-xl text-xs font-bold font-mono cursor-pointer flex items-center gap-2 ${
                           isSelected
                             ? "bg-[#283826] text-[#F7F5F0] shadow-sm ring-2 ring-[#283826]/30"
                             : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2] border border-[#D5CFBE]"
@@ -586,7 +586,7 @@ export default function PYQPortalPage() {
                           setPassChapter("all");
                           setPassPage(1);
                         }}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-bold font-mono transition-all cursor-pointer flex items-center gap-1.5 ${
+                        className={`tab-pill px-3.5 py-2 rounded-xl text-xs font-bold font-mono cursor-pointer flex items-center gap-1.5 ${
                           isSelected
                             ? "bg-[#B07D4F] text-white shadow-2xs"
                             : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2] border border-[#D5CFBE]"
@@ -594,7 +594,7 @@ export default function PYQPortalPage() {
                       >
                         <Icon className="w-3.5 h-3.5" />
                         <span>{s.id}</span>
-                        <span className={`text-[9px] px-1 rounded ${isSelected ? "bg-white/20 text-white" : "bg-[#DFD9C7] text-[#556052]"}`}>
+                        <span className={`text-[9px] px-1 rounded transition-colors ${isSelected ? "bg-white/20 text-white" : "bg-[#DFD9C7] text-[#556052]"}`}>
                           {s.count}
                         </span>
                       </button>
@@ -928,7 +928,7 @@ export default function PYQPortalPage() {
         {/* TAB 2: VEDANTU NEET ARCHIVE (2015–2026 SEGREGATED REPOSITORY) */}
         {/* ========================================================================= */}
         {activeTab === "neet" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6 tab-pane-transition">
             
             {/* Banner Area */}
             <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#E8F0E6] to-[#DDE8DA] border border-[#C5D6C2] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -961,7 +961,7 @@ export default function PYQPortalPage() {
                   <button
                     type="button"
                     onClick={() => setNeetViewMode("questions")}
-                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`tab-pill px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 ${
                       neetViewMode === "questions"
                         ? "bg-[#1E3A20] text-white shadow-2xs"
                         : "text-[#465E44] hover:text-[#142616]"
@@ -973,7 +973,7 @@ export default function PYQPortalPage() {
                   <button
                     type="button"
                     onClick={() => setNeetViewMode("papers")}
-                    className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`tab-pill px-3 py-1.5 rounded-lg cursor-pointer flex items-center gap-1.5 ${
                       neetViewMode === "papers"
                         ? "bg-[#1E3A20] text-white shadow-2xs"
                         : "text-[#465E44] hover:text-[#142616]"
@@ -1021,7 +1021,7 @@ export default function PYQPortalPage() {
                           setNeetChapter("all");
                           setNeetPage(1);
                         }}
-                        className={`px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`tab-pill px-3.5 py-1.5 rounded-xl font-mono text-xs font-bold flex items-center gap-2 cursor-pointer ${
                           isActive
                             ? "bg-[#1E3A20] text-white shadow-2xs ring-2 ring-[#1E3A20]/20"
                             : "bg-white text-[#556052] border border-[#D5CFBE] hover:border-[#1E3A20] hover:text-[#1E3A20]"
@@ -1029,7 +1029,7 @@ export default function PYQPortalPage() {
                       >
                         <Icon className={`w-3.5 h-3.5 ${isActive ? "text-[#C8A95B]" : sub.color}`} />
                         <span>{sub.label}</span>
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
                           isActive ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-600"
                         }`}>
                           {sub.count}
@@ -1620,7 +1620,7 @@ export default function PYQPortalPage() {
         {/* TAB 3: CURATED ARCHIVE (MULTI-EXAM) */}
         {/* ========================================================================= */}
         {activeTab === "archive" && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="space-y-6 tab-pane-transition">
             {/* Filter Navigation Tabs */}
             <div className="p-5 rounded-2xl bg-[#FAF8F5] border border-[#D5CFBE] space-y-4 shadow-2xs">
               <div className="space-y-2 pb-3 border-b border-[#E1DDD2]">
@@ -1662,14 +1662,14 @@ export default function PYQPortalPage() {
                           );
                           if (matching.length > 0) selectQuestion(matching[0].id);
                         }}
-                        className={`px-4 py-2.5 rounded-xl text-xs font-bold font-mono transition-all flex items-center gap-2 cursor-pointer ${
+                        className={`tab-pill px-4 py-2.5 rounded-xl text-xs font-bold font-mono flex items-center gap-2 cursor-pointer ${
                           isSelected
                             ? "bg-[#283826] text-[#F7F5F0] shadow-sm ring-2 ring-[#283826]/30"
                             : "bg-[#EFECE3] text-[#556052] hover:bg-[#E5E0D2] border border-[#D5CFBE]"
                         }`}
                       >
                         <span>{item.label}</span>
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${isSelected ? "bg-white/20 text-[#F7F5F0]" : "bg-[#DFD9C7] text-[#556052]"}`}>
+                        <span className={`text-[9px] px-1.5 py-0.5 rounded-full transition-colors ${isSelected ? "bg-white/20 text-[#F7F5F0]" : "bg-[#DFD9C7] text-[#556052]"}`}>
                           {countForExam}
                         </span>
                       </button>
@@ -1860,7 +1860,7 @@ export default function PYQPortalPage() {
         {/* TAB 3: JUMBLED EXAM PAPERS & CBT SIMULATOR */}
         {/* ========================================================================= */}
         {activeTab === "jumbled" && (
-          <div className="space-y-8 animate-in fade-in duration-200">
+          <div className="space-y-8 tab-pane-transition">
             {!activeJumbledPaper ? (
               <div className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

@@ -266,6 +266,49 @@ html.lenis, html.lenis body {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Silky-Smooth Tab Transition System */
+.tab-pill {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, background-color, border-color, box-shadow, color;
+  user-select: none;
+}
+
+.tab-pill:active {
+  transform: scale(0.96);
+}
+
+.tab-pane-transition {
+  animation: tabFadeSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes tabFadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-pane-scale {
+  animation: tabFadeScale 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes tabFadeScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Custom cursor hide default */
 @media (min-width: 1024px) {
   body.has-custom-cursor {
