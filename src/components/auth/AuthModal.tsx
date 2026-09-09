@@ -499,7 +499,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
               <span>Real-Time Cloud Ledger & Record Preservation</span>
             </div>
             <p>
-              Your Google identity is securely synchronized with Supabase database (<code className="font-mono text-[10px] text-[#283826]">tsdnbwwglfcfjmukbjyg.supabase.co</code>). All MCQs, PYQs, and focus records are persistently preserved across sessions.
+              Your Google identity is securely synchronized with Supabase database (<code className="font-mono text-[10px] text-[#283826]">fzqdcsxmhndhgkemrpem.supabase.co</code>). All MCQs, PYQs, and focus records are persistently preserved across sessions.
             </p>
           </div>
         </div>
