@@ -96,7 +96,7 @@ const DEFAULT_PROFILE: StudentProfile = {
   id: "student-krishna-addanki-2026",
   fullName: "Krishna Addanki",
   email: "krishna.addanki633@gmail.com",
-  avatarUrl: "https://avatars.githubusercontent.com/u/101566537?v=4",
+  avatarUrl: "/images/default-avatar.svg",
   githubUsername: "shannu760",
   authProvider: "github",
   classLevel: "Class 12",

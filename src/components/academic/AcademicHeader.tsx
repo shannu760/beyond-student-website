@@ -14,13 +14,16 @@ import {
   Bell,
   CheckCircle2,
   Lock,
-  RotateCcw
+  RotateCcw,
+  Calendar,
+  Award,
+  Compass,
+  Crown
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { DailyReportNotificationModal } from "@/components/academic/DailyReportNotificationModal";
 import { BeyondBrandBadge } from "@/components/brand/BeyondBrandBadge";
 import { MembershipUpgradeModal } from "@/components/academic/MembershipUpgradeModal";
-import { Crown } from "lucide-react";
 
 export function AcademicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -75,7 +78,7 @@ export function AcademicHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[#F7F5F0]/95 paper-texture backdrop-blur-md border-b border-[#E1DDD2] text-[#1A2219]">
+      <header className="sticky top-0 z-50 bg-[#F7F5F0]/95 backdrop-blur-md border-b border-[#E1DDD2] text-[#1A2219]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           
           {/* Official BEYOND Brand Badge */}
@@ -99,17 +102,20 @@ export function AcademicHeader() {
               <Tv className="w-3.5 h-3.5 text-[#B07D4F]" />
               <span>Videos</span>
             </a>
-            <a href="#schedule" className="hover:text-[#283826] transition-colors">
-              Study Planner
+            <a href="#schedule" className="hover:text-[#283826] transition-colors flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5 text-[#6C7D64]" />
+              <span>Study Planner</span>
             </a>
             <a href="#explain-and-earn" className="hover:text-[#283826] transition-colors flex items-center gap-1 text-[#B07D4F] font-bold">
               <Star className="w-3.5 h-3.5 fill-[#B07D4F]" />
               <span>Explain & Earn</span>
             </a>
-            <a href="#study-hall" className="hover:text-[#283826] transition-colors">
-              Quiet Study Rooms
+            <a href="#study-hall" className="hover:text-[#283826] transition-colors flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-[#283826]" />
+              <span>Quiet Study Rooms</span>
             </a>
             <a href="#scholarships" className="hover:text-[#283826] transition-colors flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-[#B07D4F]" />
               <span>Scholarships</span>
               <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#E8DDC8] text-[#283826]">NSP</span>
             </a>
@@ -117,8 +123,9 @@ export function AcademicHeader() {
               <Crown className="w-3.5 h-3.5 text-[#C8A95B]" />
               <span>Membership</span>
             </a>
-            <Link href="/student/dashboard" className="text-[#283826] hover:text-[#364A33] transition-colors font-bold">
-              Hub
+            <Link href="/student/dashboard" className="text-[#283826] hover:text-[#364A33] transition-colors font-bold flex items-center gap-1">
+              <Compass className="w-3.5 h-3.5 text-[#283826]" />
+              <span>Hub</span>
             </Link>
           </nav>
 
@@ -190,6 +197,9 @@ export function AcademicHeader() {
                   src={currentProfile.avatarUrl}
                   alt={currentProfile.fullName || "Student"}
                   className="w-5 h-5 rounded-full object-cover border border-[#283826]"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                  }}
                 />
               ) : (
                 /* Google G SVG */
@@ -257,52 +267,67 @@ export function AcademicHeader() {
             <Link
               href="/pyqs"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-semibold text-[#283826] py-1"
+              className="flex items-center gap-2.5 text-sm font-semibold text-[#283826] py-1"
             >
-              Official PYQs & Nemotron Ultra AI Solver
+              <BookOpen className="w-4 h-4 text-[#283826]" />
+              <span>Official PYQs & Nemotron Ultra AI Solver</span>
             </Link>
             <a
               href="#syllabus-radar"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#1A2219] py-1"
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
             >
-              Syllabus & Real-Time NTA Tracking
+              <Activity className="w-4 h-4 text-emerald-700" />
+              <span>Syllabus & Real-Time NTA Tracking</span>
             </a>
             <a
               href="#videos"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#1A2219] py-1"
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
             >
-              Curated Videos (English, Hindi, Telugu)
+              <Tv className="w-4 h-4 text-[#B07D4F]" />
+              <span>Curated Videos (English, Hindi, Telugu)</span>
             </a>
             <a
               href="#schedule"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#1A2219] py-1"
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
             >
-              Study Planner
+              <Calendar className="w-4 h-4 text-[#6C7D64]" />
+              <span>Study Planner</span>
             </a>
             <a
               href="#explain-and-earn"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#B07D4F] font-bold py-1"
+              className="flex items-center gap-2.5 text-sm font-bold text-[#B07D4F] py-1"
             >
-              Explain a Topic & Earn Stars (+75 Stars)
+              <Star className="w-4 h-4 fill-[#B07D4F] text-[#B07D4F]" />
+              <span>Explain a Topic & Earn Stars (+75 Stars)</span>
             </a>
             <a
               href="#study-hall"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#1A2219] py-1"
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
             >
-              Quiet Study Rooms
+              <Users className="w-4 h-4 text-[#283826]" />
+              <span>Quiet Study Rooms</span>
             </a>
             <a
               href="#scholarships"
               onClick={() => setMobileOpen(false)}
-              className="block text-sm font-medium text-[#1A2219] py-1"
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
             >
-              National Scholarship Radar (AY 2026-27)
+              <Award className="w-4 h-4 text-[#B07D4F]" />
+              <span>National Scholarship Radar (AY 2026-27)</span>
             </a>
+            <Link
+              href="/student/dashboard"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2.5 text-sm font-bold text-[#283826] py-1"
+            >
+              <Compass className="w-4 h-4 text-[#283826]" />
+              <span>Student Hub & Dashboard</span>
+            </Link>
 
             <button
               type="button"

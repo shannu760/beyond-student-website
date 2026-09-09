@@ -1,5 +1,35 @@
 {
   "attempts": [],
-  "focusSessions": [],
-  "dailyReports": []
+  "focusSessions": [
+    {
+      "id": "foc-1788949333286",
+      "studentId": "student-krishna-addanki-2026",
+      "durationMinutes": 30,
+      "goal": "Complete 8 indeterminate forms from Irodov & Advanced Papers",
+      "timestamp": "2026-09-09T10:22:13.286Z"
+    }
+  ],
+  "dailyReports": [
+    {
+      "id": "rep-2026-09-09",
+      "studentId": "student-krishna-addanki-2026",
+      "date": "2026-09-09",
+      "totalMCQs": 0,
+      "totalPYQs": 0,
+      "totalQuestions": 0,
+      "correctCount": 0,
+      "accuracyPercentage": 0,
+      "totalFocusMinutes": 30,
+      "starsEarnedToday": 30,
+      "masteredTopics": [
+        "Work-Energy Theorem",
+        "Calculus Limits"
+      ],
+      "reviewNeededTopics": [
+        "Rotational Dynamics Friction"
+      ],
+      "notificationRead": false,
+      "generatedAt": "2026-09-09T10:22:47.605Z"
+    }
+  ]
 }

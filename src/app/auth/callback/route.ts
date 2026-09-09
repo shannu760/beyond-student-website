@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       const avatarUrl =
         user.user_metadata?.avatar_url ||
         user.user_metadata?.picture ||
-        "https://avatars.githubusercontent.com/u/101566537?v=4";
+        "/images/default-avatar.svg";
       const githubUsername =
         user.user_metadata?.user_name ||
         user.user_metadata?.preferred_username ||

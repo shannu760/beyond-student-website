@@ -167,6 +167,9 @@ export function CuratedVideosSection() {
                     src={video.thumbnailUrl}
                     alt={video.title}
                     className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/showcase-1.png";
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 

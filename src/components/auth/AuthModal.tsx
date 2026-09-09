@@ -50,7 +50,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
           "Krishna Addanki";
         const avatar =
           user.user_metadata?.avatar_url ||
-          "https://avatars.githubusercontent.com/u/101566537?v=4";
+          "/images/default-avatar.svg";
         const githubUsername =
           user.user_metadata?.user_name ||
           user.user_metadata?.preferred_username ||
@@ -174,7 +174,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
           fullName: presetName,
           email: presetEmail,
           targetExam: presetExam,
-          avatarUrl: presetAvatar || `https://avatars.githubusercontent.com/u/101566537?v=4`,
+          avatarUrl: presetAvatar || "/images/default-avatar.svg",
           githubUsername: presetGithub || "shannu760",
           authProvider: presetProvider || "github",
           lastActive: new Date().toISOString(),
@@ -275,9 +275,12 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
             <div className="p-4 rounded-lg bg-[#EFECE3] border border-[#DDD7C8] flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <img
-                  src={activeUser.avatarUrl || "https://avatars.githubusercontent.com/u/101566537?v=4"}
+                  src={activeUser.avatarUrl || "/images/default-avatar.svg"}
                   alt={activeUser.fullName}
                   className="w-12 h-12 rounded-full border-2 border-[#283826] object-cover shadow-2xs"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                  }}
                 />
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
@@ -379,7 +382,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
                     "Krishna Addanki",
                     "krishna.addanki633@gmail.com",
                     "JEE Main & Advanced 2027",
-                    "https://avatars.githubusercontent.com/u/101566537?v=4",
+                    "/images/default-avatar.svg",
                     "shannu760",
                     "github"
                   )
@@ -387,9 +390,12 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
                 className="p-3 rounded-lg bg-emerald-50/80 hover:bg-emerald-100/80 border-2 border-[#283826] text-left transition-all flex items-center gap-2.5 text-xs group sm:col-span-2 shadow-xs"
               >
                 <img
-                  src="https://avatars.githubusercontent.com/u/101566537?v=4"
+                  src="/images/default-avatar.svg"
                   alt="Krishna"
                   className="w-9 h-9 rounded-full border border-[#283826] object-cover shrink-0"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                  }}
                 />
                 <div className="truncate flex-1">
                   <div className="flex items-center gap-2">

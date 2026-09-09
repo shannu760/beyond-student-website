@@ -165,7 +165,14 @@ export default function StudentLayout({
           >
             <div className="w-8 h-8 rounded bg-[#F0EDE4] text-[#283826] font-bold text-xs flex items-center justify-center border border-[#E1DDD2] group-hover:scale-105 transition-transform font-mono overflow-hidden">
               {profile?.avatarUrl ? (
-                <img src={profile.avatarUrl} alt={profile.fullName} className="w-full h-full object-cover" />
+                <img 
+                  src={profile.avatarUrl} 
+                  alt={profile.fullName} 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                  }}
+                />
               ) : (
                 initials
               )}

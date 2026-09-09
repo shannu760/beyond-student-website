@@ -260,7 +260,7 @@ export default function StudentProfilePage() {
         "Krishna Addanki";
       const avatarUrl =
         user.user_metadata?.avatar_url ||
-        "https://avatars.githubusercontent.com/u/101566537?v=4";
+        "/images/default-avatar.svg";
       const githubUsername =
         user.user_metadata?.user_name ||
         user.user_metadata?.preferred_username ||
@@ -493,9 +493,12 @@ export default function StudentProfilePage() {
               <div className="w-20 h-20 rounded-2xl bg-[#F0EDE4] text-[#283826] font-bold text-3xl flex items-center justify-center border-2 border-[#B07D4F] shadow-lg font-mono overflow-hidden">
                 {profile?.avatarUrl ? (
                   <img 
-                    src={profile.avatarUrl} 
-                    alt={profile.fullName} 
+                    src={profile.avatarUrl || "/images/default-avatar.svg"} 
+                    alt={profile.fullName || "Student"} 
                     className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                    }}
                   />
                 ) : (
                   studentInitials

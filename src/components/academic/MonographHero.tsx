@@ -54,9 +54,12 @@ export function MonographHero() {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#283826] text-[#F7F5F0] text-xs font-mono hover:bg-[#364A33] transition-all shadow-2xs group"
             >
               <img
-                src={profile?.avatarUrl || "https://avatars.githubusercontent.com/u/101566537?v=4"}
+                src={profile?.avatarUrl || "/images/default-avatar.svg"}
                 alt={firstName}
                 className="w-4 h-4 rounded-full object-cover border border-[#C8A95B]"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                }}
               />
               <span>Welcome back, <strong className="text-[#C8A95B] font-bold">{firstName}</strong></span>
               <span className="text-[10px] text-[#D5CFBE] font-sans">
