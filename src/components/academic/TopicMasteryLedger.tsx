@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
@@ -42,8 +42,8 @@ export function TopicMasteryLedger() {
     : MASTERY_ITEMS.filter((item) => item.subject === selectedSubject);
 
   return (
-    <section id="mastery" className="py-16 border-b border-[#E1DDD2] bg-[#F7F5F0]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-8">
+    <section id="mastery" className="py-10 md:py-12 border-b border-[#E1DDD2] bg-[#F7F5F0]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#E1DDD2]">

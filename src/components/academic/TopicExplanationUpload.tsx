@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { 
@@ -172,8 +172,8 @@ export function TopicExplanationUpload() {
   };
 
   return (
-    <section id="explain-and-earn" className="py-16 md:py-24 border-b border-[#E1DDD2] bg-[#FAF8F5]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
+    <section id="explain-and-earn" className="py-10 md:py-14 border-b border-[#E1DDD2] bg-[#FAF8F5]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Section Header with Real-Time Profile Stars Badge */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E1DDD2]">
@@ -280,7 +280,7 @@ export function TopicExplanationUpload() {
                 <select
                   value={selectedTopicIndex}
                   onChange={(e) => setSelectedTopicIndex(Number(e.target.value))}
-                  className="w-full bg-white border border-[#E1DDD2] rounded p-3 text-xs font-sans text-[#1A2219] focus:outline-none focus:border-[#283826] shadow-2xs"
+                  className="w-full bg-[#FAF8F5] border border-[#E1DDD2] rounded p-3 text-xs font-sans text-[#1A2219] focus:outline-none focus:border-[#283826] shadow-2xs"
                 >
                   {SYLLABUS_TOPICS.map((item, idx) => (
                     <option key={idx} value={idx}>
@@ -305,7 +305,7 @@ export function TopicExplanationUpload() {
                   value={explanationText}
                   onChange={(e) => setExplanationText(e.target.value)}
                   placeholder="Explain the intuition, state the governing theorem, write the derivation steps, or point out common traps students fall into during exams..."
-                  className="w-full bg-white border border-[#E1DDD2] rounded p-3 text-xs font-sans text-[#1A2219] placeholder:text-[#556052]/60 focus:outline-none focus:border-[#283826] shadow-2xs leading-relaxed"
+                  className="w-full bg-[#FAF8F5] border border-[#E1DDD2] rounded p-3 text-xs font-sans text-[#1A2219] placeholder:text-[#556052]/60 focus:outline-none focus:border-[#283826] shadow-2xs leading-relaxed"
                   required
                 />
               </div>
@@ -326,7 +326,7 @@ export function TopicExplanationUpload() {
 
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-[#E1DDD2] hover:border-[#283826] rounded-lg p-6 text-center cursor-pointer bg-white transition-colors space-y-2"
+                  className="border-2 border-dashed border-[#E1DDD2] hover:border-[#283826] rounded-lg p-6 text-center cursor-pointer bg-[#FAF8F5] transition-colors space-y-2"
                 >
                   <input
                     ref={fileInputRef}
@@ -391,7 +391,7 @@ export function TopicExplanationUpload() {
             {explanations.map((item) => (
               <div
                 key={item.id}
-                className="p-5 rounded bg-white border border-[#E1DDD2] space-y-3 shadow-2xs hover:border-[#283826] transition-all"
+                className="p-5 rounded bg-[#FAF8F5] border border-[#E1DDD2] space-y-3 shadow-2xs hover:border-[#283826] transition-all"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#E1DDD2]">
                   <div className="flex items-center gap-2">

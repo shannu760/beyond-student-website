@@ -126,8 +126,8 @@ export function StudentAmenitiesSection() {
   const activeAmenity = AMENITY_CATEGORIES.find((c) => c.id === activeTab) || AMENITY_CATEGORIES[0];
 
   return (
-    <section id="amenities" className="py-16 md:py-24 border-b border-[#E1DDD2] bg-[#F7F5F0]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
+    <section id="amenities" className="py-10 md:py-14 border-b border-[#E1DDD2] bg-[#F7F5F0]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Section Header */}
         <div className="space-y-3 pb-6 border-b border-[#E1DDD2]">
@@ -202,7 +202,7 @@ export function StudentAmenitiesSection() {
           {/* Key Amenities Delivered with Staggered Scroll Reveal */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-2 scroll-reveal-stagger">
             {activeAmenity.keyFeatures.map((feat, idx) => (
-              <div key={idx} className="p-4 rounded bg-white border border-[#E1DDD2] space-y-2 flex flex-col justify-between">
+              <div key={idx} className="p-4 rounded bg-[#FAF8F5] border border-[#E1DDD2] space-y-2 flex flex-col justify-between">
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-[#283826] shrink-0" />

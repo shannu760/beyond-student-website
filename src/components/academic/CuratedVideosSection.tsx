@@ -42,8 +42,8 @@ export function CuratedVideosSection() {
   }, [selectedLanguage, selectedExam, selectedLevel, searchQuery]);
 
   return (
-    <section id="videos" className="py-16 md:py-24 border-b border-[#E1DDD2] bg-[#F7F5F0]">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-8">
+    <section id="videos" className="py-10 md:py-14 border-b border-[#E1DDD2] bg-[#F7F5F0]">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#E1DDD2]">
@@ -105,7 +105,7 @@ export function CuratedVideosSection() {
                 placeholder="Search chapter, unit, or educator..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg bg-white border border-[#D5CFBE] focus:border-[#283826] focus:outline-hidden text-[#1A2219]"
+                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg bg-[#FAF8F5] border border-[#D5CFBE] focus:border-[#283826] focus:outline-hidden text-[#1A2219]"
               />
             </div>
           </div>
@@ -158,7 +158,7 @@ export function CuratedVideosSection() {
           {filteredVideos.map((video) => (
             <div
               key={video.id}
-              className="bg-white rounded-xl border border-[#E1DDD2] overflow-hidden hover:border-[#283826] transition-all shadow-2xs flex flex-col justify-between group"
+              className="bg-[#FAF8F5] rounded-xl border border-[#E1DDD2] overflow-hidden hover:border-[#283826] transition-all shadow-2xs flex flex-col justify-between group"
             >
               <div>
                 {/* Thumbnail Header Area with Badges */}

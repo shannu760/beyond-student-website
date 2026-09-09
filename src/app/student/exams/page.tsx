@@ -313,7 +313,7 @@ export default function ExamsQuizPage() {
           </div>
 
           {/* Interactive Custom Jumbled Exam Generator */}
-          <div className="bg-radial from-[#ECE7DC] to-[#E3DEC9] border border-[#D5CFBE] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="bg-gradient-to-br from-[#ECE7DC] to-[#E3DEC9] border border-[#D5CFBE] rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="text-[10px] font-mono uppercase font-bold bg-[#B07D4F] text-white px-2.5 py-0.5 rounded-full">

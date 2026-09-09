@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { 
@@ -298,8 +298,8 @@ export function SyllabusAndNTATracker() {
   }).filter(Boolean) as SyllabusDomain[];
 
   return (
-    <section id="syllabus-radar" className="py-16 md:py-24 border-b border-[#E1DDD2] bg-[#F7F5F0]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
+    <section id="syllabus-radar" className="py-10 md:py-14 border-b border-[#E1DDD2] bg-[#F7F5F0]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Real-time Tracking Status Strip */}
         <div className="p-4 rounded bg-[#FAF8F5] border border-[#E1DDD2] flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-2xs">
@@ -370,7 +370,7 @@ export function SyllabusAndNTATracker() {
                 ${
                   selectedExamId === exam.id
                     ? "bg-[#283826] text-[#F7F5F0] border-[#283826] shadow-xs"
-                    : "bg-white text-[#556052] border-[#E1DDD2] hover:border-[#283826] hover:text-[#1A2219]"
+                    : "bg-[#FAF8F5] text-[#556052] border-[#E1DDD2] hover:border-[#283826] hover:text-[#1A2219]"
                 }
               `}
             >
@@ -403,7 +403,7 @@ export function SyllabusAndNTATracker() {
               href={currentExam.officialSite}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-white text-[#283826] border border-[#E1DDD2] text-xs font-mono font-bold hover:bg-[#FAF8F5] transition-all shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded bg-[#FAF8F5] text-[#283826] border border-[#E1DDD2] text-xs font-mono font-bold hover:bg-[#F0EDE4] transition-all shadow-2xs"
             >
               <Globe className="w-3.5 h-3.5 text-[#6C7D64]" />
               <span>Official Bulletin</span>
@@ -420,7 +420,7 @@ export function SyllabusAndNTATracker() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={`Search across all ${currentExam.examName} topics, subtopics, or formulas...`}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-[#E1DDD2] rounded text-xs font-sans text-[#1A2219] placeholder:text-[#556052]/60 focus:outline-none focus:border-[#283826] shadow-2xs"
+            className="w-full pl-10 pr-4 py-3 bg-[#FAF8F5] border border-[#E1DDD2] rounded text-xs font-sans text-[#1A2219] placeholder:text-[#556052]/60 focus:outline-none focus:border-[#283826] shadow-2xs"
           />
         </div>
 
@@ -429,7 +429,7 @@ export function SyllabusAndNTATracker() {
           {filteredDomains.map((dom, idx) => (
             <div
               key={idx}
-              className="p-5 rounded bg-white border border-[#E1DDD2] hover:border-[#283826] transition-all space-y-3 shadow-2xs flex flex-col justify-between"
+              className="p-5 rounded bg-[#FAF8F5] border border-[#E1DDD2] hover:border-[#283826] transition-all space-y-3 shadow-2xs flex flex-col justify-between"
             >
               <div className="space-y-2.5">
                 <div className="flex items-start justify-between gap-2 pb-2 border-b border-[#E1DDD2]">

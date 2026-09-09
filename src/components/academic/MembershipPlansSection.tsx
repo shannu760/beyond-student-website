@@ -40,9 +40,9 @@ export function MembershipPlansSection({
   };
 
   return (
-    <section className={`py-16 px-4 sm:px-6 max-w-7xl mx-auto ${className}`}>
+    <section className={`py-10 md:py-12 px-4 sm:px-6 max-w-7xl mx-auto ${className}`}>
       {/* Brand & Section Header */}
-      <div className="text-center max-w-3xl mx-auto space-y-4 mb-14">
+      <div className="text-center max-w-3xl mx-auto space-y-3 mb-8">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EBE7DC] border border-[#D5CFBE]">
           <BeyondBrandBadge size="xs" withLink={false} showSubtitle={false} />
           <span className="text-[11px] font-mono font-bold tracking-wider text-[#283826] uppercase">
@@ -102,7 +102,7 @@ export function MembershipPlansSection({
           <div className="pt-8">
             <button
               disabled={currentTier === "FREE"}
-              className="w-full py-3 rounded-xl border border-[#D5CFBE] font-sans font-semibold text-xs text-[#4F5E4B] bg-white hover:bg-[#F0EDE4] transition-colors disabled:opacity-75"
+              className="w-full py-3 rounded-xl border border-[#D5CFBE] font-sans font-semibold text-xs text-[#4F5E4B] bg-[#FAF9F5] hover:bg-[#F0EDE4] transition-colors disabled:opacity-75"
             >
               {currentTier === "FREE" ? "Current Tier (Free Active)" : "Free Active"}
             </button>
@@ -110,7 +110,7 @@ export function MembershipPlansSection({
         </div>
 
         {/* Tier 2: Premium (₹499 for 3 months) */}
-        <div className="relative rounded-3xl bg-white border-2 border-emerald-600/70 p-7 flex flex-col justify-between shadow-xl ring-1 ring-emerald-500/20 scale-[1.02] z-10">
+        <div className="relative rounded-3xl bg-[#FAF9F5] border-2 border-emerald-600/70 p-7 flex flex-col justify-between shadow-xl ring-1 ring-emerald-500/20 scale-[1.02] z-10">
           {/* Top Banner Tag */}
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-emerald-700 text-white font-mono font-bold text-[10px] tracking-wider uppercase shadow-md flex items-center gap-1.5">
             <Star className="w-3 h-3 fill-white" />

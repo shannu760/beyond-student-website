@@ -268,8 +268,8 @@ Verified Application Ledger 2026–27`;
   };
 
   return (
-    <section id="scholarships" className="py-16 border-b border-[#E1DDD2] bg-[#F7F5F0]">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-8">
+    <section id="scholarships" className="py-10 md:py-12 border-b border-[#E1DDD2] bg-[#F7F5F0]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-[#E1DDD2]">
@@ -331,7 +331,7 @@ Verified Application Ledger 2026–27`;
                 className={`p-4 rounded-xl border text-left transition-all flex flex-col justify-between space-y-3 cursor-pointer ${
                   isSelected
                     ? "bg-[#FAF8F5] border-[#283826] shadow-md ring-1 ring-[#283826]"
-                    : "bg-white hover:bg-[#F0EDE4] border-[#E1DDD2] text-[#1A2219]"
+                    : "bg-[#FAF8F5] hover:bg-[#F0EDE4] border-[#E1DDD2] text-[#1A2219]"
                 }`}
               >
                 <div>
@@ -429,7 +429,7 @@ Verified Application Ledger 2026–27`;
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {current.documentChecklist.map((doc, idx) => (
-                <div key={idx} className="p-2.5 rounded bg-white border border-[#E1DDD2] flex items-center gap-2 text-xs text-[#283826]">
+                <div key={idx} className="p-2.5 rounded bg-[#FAF8F5] border border-[#E1DDD2] flex items-center gap-2 text-xs text-[#283826]">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                   <span className="font-medium">{doc}</span>
                 </div>

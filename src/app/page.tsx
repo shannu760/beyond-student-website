@@ -22,7 +22,7 @@ export default function Home() {
       <AcademicHeader />
 
       {/* Main Academic Growth Network Experience with Silky Smooth Scroll Reveals */}
-      <main className="relative z-10 space-y-2">
+      <main className="relative z-10">
         <MonographHero />
         
         {/* Real-Time NTA Tracking & SAT/GRE Syllabus Matrix */}

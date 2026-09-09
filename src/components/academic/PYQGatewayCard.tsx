@@ -16,8 +16,8 @@ import {
 
 export function PYQGatewayCard() {
   return (
-    <section className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-      <div className="rounded-xl bg-[#FAF8F5] paper-texture border border-[#D5CFBE] p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden group">
+    <section className="max-w-5xl mx-auto px-4 sm:px-6 py-6 md:py-8">
+      <div className="rounded-xl bg-[#FAF8F5] border border-[#D5CFBE] p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden group">
         
         {/* Subtle Decorative Background Accent */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#283826]/5 rounded-full blur-2xl pointer-events-none -mr-20 -mt-20" />

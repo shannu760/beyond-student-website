@@ -7,8 +7,8 @@ import { BeyondBrandBadge } from "@/components/brand/BeyondBrandBadge";
 
 export function AcademicFooter() {
   return (
-    <footer className="bg-[#F0EDE4] border-t border-[#E1DDD2] text-[#1A2219] py-12 md:py-16">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-10">
+    <footer className="bg-[#F0EDE4] border-t border-[#E1DDD2] text-[#1A2219] py-8 md:py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
         
         {/* Top Monograph Brand Strip */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-[#E1DDD2]">

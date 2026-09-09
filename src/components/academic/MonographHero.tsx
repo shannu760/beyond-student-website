@@ -36,7 +36,7 @@ export function MonographHero() {
   const firstName = profile?.fullName ? profile.fullName.trim().split(" ")[0] : null;
 
   return (
-    <section className="pt-12 pb-16 md:pt-16 md:pb-24 border-b border-[#E1DDD2] bg-[#F7F5F0]">
+    <section className="pt-8 pb-10 md:pt-12 md:pb-14 border-b border-[#E1DDD2] bg-[#F7F5F0]">
       <div className="max-w-5xl mx-auto px-4 sm:px-6">
         
         {/* Monograph Top Metadata Stamp */}
@@ -117,7 +117,7 @@ export function MonographHero() {
         </div>
 
         {/* Four Academic Pillars Grid */}
-        <div className="mt-14 pt-10 border-t border-[#E1DDD2] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-8 pt-6 border-t border-[#E1DDD2] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-4 rounded bg-[#F0EDE4]/60 border border-[#E1DDD2] space-y-2">
             <div className="flex items-center gap-2 text-[#283826]">
               <Compass className="w-4 h-4 text-[#283826]" />

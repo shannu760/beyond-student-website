@@ -501,7 +501,7 @@ export default function PYQPortalPage() {
           <div className="space-y-6 animate-in fade-in duration-200">
             
             {/* Banner Area */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-radial from-[#ECE7DC] to-[#E3DEC9] border border-[#D5CFBE] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#ECE7DC] to-[#E3DEC9] border border-[#D5CFBE] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full bg-[#283826] text-[#F7F5F0] text-[10px] font-mono uppercase tracking-wider font-semibold flex items-center gap-1">
@@ -931,7 +931,7 @@ export default function PYQPortalPage() {
           <div className="space-y-6 animate-in fade-in duration-200">
             
             {/* Banner Area */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-radial from-[#E8F0E6] to-[#DDE8DA] border border-[#C5D6C2] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#E8F0E6] to-[#DDE8DA] border border-[#C5D6C2] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full bg-[#1E3A20] text-[#F7F5F0] text-[10px] font-mono uppercase tracking-wider font-semibold flex items-center gap-1">
@@ -1891,7 +1891,7 @@ export default function PYQPortalPage() {
                 </div>
 
                 {/* Custom Generator */}
-                <div className="bg-radial from-[#ECE7DC] to-[#E5E0CE] border border-[#D5CFBE] rounded-3xl p-6 sm:p-8 space-y-6">
+                <div className="bg-gradient-to-br from-[#ECE7DC] to-[#E5E0CE] border border-[#D5CFBE] rounded-3xl p-6 sm:p-8 space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <h3 className="font-serif font-bold text-xl text-[#1A2219]">🎲 Generate Custom Jumbled Exam</h3>
