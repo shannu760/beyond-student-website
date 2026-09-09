@@ -276,7 +276,7 @@ export default function StudentProfilePage() {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ avatarUrl: "/images/default-avatar.svg" }),
+        body: JSON.stringify({ avatarUrl: "/images/user-avatar.jpg" }),
       });
       const data = await res.json();
       if (data?.profile) {
@@ -285,7 +285,7 @@ export default function StudentProfilePage() {
       window.dispatchEvent(new Event("beyond:activity-updated"));
       setPhotoFeedback({
         type: "success",
-        message: "Profile avatar reset to official BEYOND monogram.",
+        message: "Profile avatar reset to official student portrait.",
       });
       setTimeout(() => setPhotoFeedback(null), 3000);
     } catch {
@@ -356,26 +356,32 @@ export default function StudentProfilePage() {
         user.user_metadata?.user_name ||
         user.user_metadata?.preferred_username ||
         "Krishna Addanki";
-      const avatarUrl =
-        user.user_metadata?.avatar_url ||
-        "/images/default-avatar.svg";
       const githubUsername =
         user.user_metadata?.user_name ||
         user.user_metadata?.preferred_username ||
         (user.app_metadata?.provider === "github" ? "shannu760" : undefined);
       const authProvider = user.app_metadata?.provider === "github" ? "github" : "google";
 
+      const syncPayload: Record<string, any> = {
+        email,
+        fullName,
+        githubUsername,
+        authProvider,
+      };
+
+      // Only adopt OAuth avatar if student doesn't already have an avatar set
+      if (
+        user.user_metadata?.avatar_url &&
+        (!profile?.avatarUrl || profile.avatarUrl === "/images/default-avatar.svg")
+      ) {
+        syncPayload.avatarUrl = user.user_metadata.avatar_url;
+      }
+
       try {
         const res = await fetch("/api/profile", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email,
-            fullName,
-            avatarUrl,
-            githubUsername,
-            authProvider,
-          }),
+          body: JSON.stringify(syncPayload),
         });
         const json = await res.json();
         if (json.profile) {
@@ -632,11 +638,11 @@ export default function StudentProfilePage() {
               >
                 {profile?.avatarUrl ? (
                   <img 
-                    src={profile.avatarUrl || "/images/default-avatar.svg"} 
+                    src={profile.avatarUrl || "/images/user-avatar.jpg"} 
                     alt={profile.fullName || "Student"} 
                     className="w-full h-full object-cover" 
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                      (e.target as HTMLImageElement).src = "/images/user-avatar.jpg";
                     }}
                   />
                 ) : (
@@ -764,16 +770,16 @@ export default function StudentProfilePage() {
                   )}
                 </button>
 
-                {profile?.avatarUrl && profile.avatarUrl !== "/images/default-avatar.svg" && (
+                {profile?.avatarUrl && profile.avatarUrl !== "/images/user-avatar.jpg" && (
                   <button
                     type="button"
                     onClick={handleResetAvatar}
                     disabled={isUploadingPhoto}
                     className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-black/25 hover:bg-black/40 text-[#F0EDE4]/80 text-[11px] font-mono transition-colors cursor-pointer border border-white/10"
-                    title="Reset to default monogram avatar"
+                    title="Reset to official student portrait"
                   >
                     <RotateCcw className="w-3 h-3 text-[#C8A95B]" />
-                    <span>Reset Avatar</span>
+                    <span>Reset Photo</span>
                   </button>
                 )}
               </div>

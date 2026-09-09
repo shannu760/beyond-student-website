@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     let hostName = "Krishna Addanki";
-    let hostAvatar = "/images/default-avatar.svg";
+    let hostAvatar = "/images/user-avatar.jpg";
     try {
       const profile = await getPreservedProfile();
       if (profile?.fullName) hostName = profile.fullName;

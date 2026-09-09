@@ -106,26 +106,32 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
           user.user_metadata?.user_name ||
           user.user_metadata?.preferred_username ||
           "Krishna Addanki";
-        const avatar =
-          user.user_metadata?.avatar_url ||
-          "/images/default-avatar.svg";
         const githubUsername =
           user.user_metadata?.user_name ||
           user.user_metadata?.preferred_username ||
           (user.app_metadata?.provider === "github" ? "shannu760" : undefined);
         const authProvider = user.app_metadata?.provider === "github" ? "github" : "google";
 
+        const syncPayload: Record<string, any> = {
+          email,
+          fullName: name,
+          githubUsername,
+          authProvider,
+        };
+
+        // Only adopt OAuth avatar if student doesn't already have an avatar set
+        if (
+          user.user_metadata?.avatar_url &&
+          (!activeUser?.avatarUrl || activeUser.avatarUrl === "/images/default-avatar.svg")
+        ) {
+          syncPayload.avatarUrl = user.user_metadata.avatar_url;
+        }
+
         try {
           const res = await fetch("/api/profile", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email,
-              fullName: name,
-              avatarUrl: avatar,
-              githubUsername,
-              authProvider,
-            }),
+            body: JSON.stringify(syncPayload),
           });
           const json = await res.json();
           if (json.profile) {
@@ -232,7 +238,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
           fullName: presetName,
           email: presetEmail,
           targetExam: presetExam,
-          avatarUrl: presetAvatar || "/images/default-avatar.svg",
+          avatarUrl: presetAvatar || activeUser?.avatarUrl || "/images/user-avatar.jpg",
           githubUsername: presetGithub || "shannu760",
           authProvider: presetProvider || "github",
           lastActive: new Date().toISOString(),
@@ -347,11 +353,11 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
                   title="Click to upload profile photo from phone or computer"
                 >
                   <img
-                    src={activeUser.avatarUrl || "/images/default-avatar.svg"}
+                    src={activeUser.avatarUrl || "/images/user-avatar.jpg"}
                     alt={activeUser.fullName}
                     className="w-12 h-12 rounded-full border-2 border-[#283826] object-cover shadow-2xs group-hover:brightness-90 transition-all"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                      (e.target as HTMLImageElement).src = "/images/user-avatar.jpg";
                     }}
                   />
                   <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
@@ -485,7 +491,7 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
                     "Krishna Addanki",
                     "krishna.addanki633@gmail.com",
                     "JEE Main & Advanced 2027",
-                    "/images/default-avatar.svg",
+                    "/images/user-avatar.jpg",
                     "shannu760",
                     "github"
                   )
@@ -493,11 +499,11 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
                 className="p-3 rounded-lg bg-emerald-50/80 hover:bg-emerald-100/80 border-2 border-[#283826] text-left transition-all flex items-center gap-2.5 text-xs group sm:col-span-2 shadow-xs"
               >
                 <img
-                  src="/images/default-avatar.svg"
+                  src="/images/user-avatar.jpg"
                   alt="Krishna"
                   className="w-9 h-9 rounded-full border border-[#283826] object-cover shrink-0"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                    (e.target as HTMLImageElement).src = "/images/user-avatar.jpg";
                   }}
                 />
                 <div className="truncate flex-1">

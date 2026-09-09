@@ -18,10 +18,9 @@ export async function GET(request: Request) {
         user.user_metadata?.user_name ||
         user.user_metadata?.preferred_username ||
         "Krishna Addanki";
-      const avatarUrl =
+      const oauthAvatar =
         user.user_metadata?.avatar_url ||
-        user.user_metadata?.picture ||
-        "/images/default-avatar.svg";
+        user.user_metadata?.picture;
       const githubUsername =
         user.user_metadata?.user_name ||
         user.user_metadata?.preferred_username ||
@@ -29,13 +28,16 @@ export async function GET(request: Request) {
       const authProvider = user.app_metadata?.provider === "github" ? "github" : "google";
 
       try {
-        await updatePreservedProfile({
+        const updatePayload: Record<string, any> = {
           email,
           fullName,
-          avatarUrl,
           githubUsername,
           authProvider,
-        });
+        };
+        if (oauthAvatar) {
+          updatePayload.avatarUrl = oauthAvatar;
+        }
+        await updatePreservedProfile(updatePayload);
       } catch (err) {
         console.error("Failed to sync profile during OAuth exchange:", err);
       }

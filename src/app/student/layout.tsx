@@ -170,7 +170,7 @@ export default function StudentLayout({
                   alt={profile.fullName} 
                   className="w-full h-full object-cover" 
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                    (e.target as HTMLImageElement).src = "/images/user-avatar.jpg";
                   }}
                 />
               ) : (

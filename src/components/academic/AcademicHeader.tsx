@@ -198,7 +198,7 @@ export function AcademicHeader() {
                   alt={currentProfile.fullName || "Student"}
                   className="w-5 h-5 rounded-full object-cover border border-[#283826]"
                   onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/images/default-avatar.svg";
+                    (e.target as HTMLImageElement).src = "/images/user-avatar.jpg";
                   }}
                 />
               ) : (

@@ -96,7 +96,7 @@ const DEFAULT_PROFILE: StudentProfile = {
   id: "student-krishna-addanki-2026",
   fullName: "Krishna Addanki",
   email: "krishna.addanki633@gmail.com",
-  avatarUrl: "/images/default-avatar.svg",
+  avatarUrl: "/images/user-avatar.jpg",
   githubUsername: "shannu760",
   authProvider: "github",
   classLevel: "Class 12",
@@ -177,45 +177,70 @@ function saveActivityState(state: StudentActivityState) {
 export async function getPreservedProfile(): Promise<StudentProfile> {
   ensureDataDir();
 
-  // Try Supabase first
+  let fileProfile: StudentProfile = DEFAULT_PROFILE;
+  if (!fs.existsSync(PROFILE_FILE)) {
+    fs.writeFileSync(PROFILE_FILE, JSON.stringify(DEFAULT_PROFILE, null, 2), "utf8");
+  } else {
+    try {
+      const fileData = fs.readFileSync(PROFILE_FILE, "utf8");
+      fileProfile = { ...DEFAULT_PROFILE, ...JSON.parse(fileData) };
+    } catch {
+      fileProfile = DEFAULT_PROFILE;
+    }
+  }
+
+  // Ensure custom uploaded avatar is used by default instead of placeholder svg
+  let currentAvatar = fileProfile.avatarUrl;
+  if (!currentAvatar || currentAvatar === "/images/default-avatar.svg") {
+    currentAvatar = "/images/user-avatar.jpg";
+    fileProfile.avatarUrl = currentAvatar;
+  }
+
+  // Try Supabase sync
   try {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .eq("email", DEFAULT_PROFILE.email)
+      .eq("email", fileProfile.email || DEFAULT_PROFILE.email)
       .single();
 
     if (data && !error) {
+      const supabaseAvatar =
+        data.avatar_url && data.avatar_url !== "/images/default-avatar.svg"
+          ? data.avatar_url
+          : undefined;
+
       return {
-        ...DEFAULT_PROFILE,
-        fullName: data.full_name || DEFAULT_PROFILE.fullName,
-        starsBalance: data.stars_balance ?? DEFAULT_PROFILE.starsBalance,
-        streakDays: data.streak_days ?? DEFAULT_PROFILE.streakDays,
+        ...fileProfile,
+        fullName: data.full_name || fileProfile.fullName,
+        starsBalance: data.stars_balance ?? fileProfile.starsBalance,
+        streakDays: data.streak_days ?? fileProfile.streakDays,
+        avatarUrl: currentAvatar || supabaseAvatar || "/images/user-avatar.jpg",
       };
     }
   } catch {
     // Fallback
   }
 
-  if (!fs.existsSync(PROFILE_FILE)) {
-    fs.writeFileSync(PROFILE_FILE, JSON.stringify(DEFAULT_PROFILE, null, 2), "utf8");
-    return DEFAULT_PROFILE;
-  }
-
-  try {
-    const fileData = fs.readFileSync(PROFILE_FILE, "utf8");
-    return JSON.parse(fileData);
-  } catch {
-    return DEFAULT_PROFILE;
-  }
+  return fileProfile;
 }
 
 export async function updatePreservedProfile(updates: Partial<StudentProfile>): Promise<StudentProfile> {
   ensureDataDir();
   const current = await getPreservedProfile();
+
+  // If updates specifies default svg or is undefined, preserve the uploaded/custom avatar
+  let nextAvatar = updates.avatarUrl !== undefined ? updates.avatarUrl : current.avatarUrl;
+  if (!nextAvatar || nextAvatar === "/images/default-avatar.svg") {
+    nextAvatar = current.avatarUrl && current.avatarUrl !== "/images/default-avatar.svg"
+      ? current.avatarUrl
+      : "/images/user-avatar.jpg";
+  }
+
   const updated: StudentProfile = {
     ...current,
     ...updates,
+    avatarUrl: nextAvatar,
     lastActive: new Date().toISOString(),
   };
 
@@ -229,6 +254,7 @@ export async function updatePreservedProfile(updates: Partial<StudentProfile>): 
       target_exam: updated.targetExam,
       streak_days: updated.streakDays,
       stars_balance: updated.starsBalance,
+      avatar_url: updated.avatarUrl,
       updated_at: new Date().toISOString(),
     });
   } catch {
