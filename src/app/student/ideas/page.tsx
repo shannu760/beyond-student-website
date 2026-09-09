@@ -135,6 +135,14 @@ export default function IdeaLabPage() {
         </button>
       </div>
 
+      {/* Ethical Student Contribution & IP Ownership Policy Banner */}
+      <div className="p-3.5 rounded-2xl bg-[#E8DCC3]/50 border border-[#3D4425]/15 text-[11px] text-[#3D4425] flex items-start sm:items-center gap-2.5">
+        <ShieldCheck className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5 sm:mt-0" />
+        <div className="leading-relaxed">
+          <strong className="text-[#252B18]">Student Ownership Guarantee:</strong> You retain 100% intellectual property ownership of all ideas submitted to BEYOND Idea Lab. Submissions serve exclusively for peer feedback, AI feasibility analysis, and community voting under our Ethical Student Contribution Policy.
+        </div>
+      </div>
+
       {/* Idea Cards Grid */}
       <div className="space-y-4">
         {ideas.map((item) => (

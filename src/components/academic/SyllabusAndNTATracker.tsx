@@ -206,7 +206,7 @@ const EXAM_SYLLABI: ExamSyllabus[] = [
     examName: "JEE Main & Advanced",
     fullName: "Joint Entrance Examination for Engineering Admissions",
     conductingBody: "National Testing Agency (NTA) & Joint Admission Board",
-    officialSite: "https://jeemain.nta.nic.in",
+    officialSite: "https://jeemain.nta.nic.in/information-bulletin/",
     lastUpdated: "NTA 2027 Information Bulletin Live Sync",
     trackingStatus: "SYNCHRONIZED",
     domains: [
@@ -251,7 +251,7 @@ const EXAM_SYLLABI: ExamSyllabus[] = [
     examName: "NEET UG",
     fullName: "National Eligibility cum Entrance Test (Undergraduate Medical)",
     conductingBody: "National Testing Agency (NTA) & NMC",
-    officialSite: "https://exams.nta.ac.in/NEET",
+    officialSite: "https://neet.nta.nic.in/",
     lastUpdated: "NMC/NTA Harmonized Curriculum 2026–27",
     trackingStatus: "SYNCHRONIZED",
     domains: [

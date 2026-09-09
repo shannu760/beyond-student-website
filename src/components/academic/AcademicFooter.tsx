@@ -37,11 +37,11 @@ export function AcademicFooter() {
               Academic Modules
             </div>
             <ul className="space-y-2 text-[#556052]">
-              <li><a href="#schedule" className="hover:text-[#283826]">Daily Study Schedule</a></li>
-              <li><a href="#study-hall" className="hover:text-[#283826]">Quiet Study Hall (Pomodoro)</a></li>
-              <li><a href="#diagnostic" className="hover:text-[#283826]">Diagnostic Guidance Engine</a></li>
-              <li><a href="#mastery" className="hover:text-[#283826]">Topic Mastery Ledger</a></li>
-              <li><a href="#scholarships" className="hover:text-[#283826]">Scholarship Radar (NSP)</a></li>
+              <li><Link href="/about" className="hover:text-[#283826]">Product Thesis & Charter</Link></li>
+              <li><Link href="/how-it-works" className="hover:text-[#283826]">How It Works (4 Growth Loops)</Link></li>
+              <li><Link href="/student/financial-literacy" className="hover:text-[#283826]">Financial Literacy Lab</Link></li>
+              <li><Link href="/student/ideas" className="hover:text-[#283826]">Idea Lab & Innovation</Link></li>
+              <li><Link href="/student/opportunities" className="hover:text-[#283826]">Scholarship Radar (NSP)</Link></li>
             </ul>
           </div>
 
@@ -54,7 +54,7 @@ export function AcademicFooter() {
               <li><Link href="/student/dashboard" className="hover:text-[#283826]">Growth Dashboard</Link></li>
               <li><Link href="/student/study/planner" className="hover:text-[#283826]">Personalized Planner</Link></li>
               <li><Link href="/student/study/rooms" className="hover:text-[#283826]">Live Focus Rooms</Link></li>
-              <li><Link href="/student/exams" className="hover:text-[#283826]">Diagnostic Quizzes</Link></li>
+              <li><Link href="/student/community" className="hover:text-[#283826]">Peer Community</Link></li>
               <li><Link href="/student/profile" className="hover:text-[#283826]">BEYOND Student ID</Link></li>
             </ul>
           </div>
@@ -100,6 +100,11 @@ export function AcademicFooter() {
             <p className="text-[#556052] text-[11px] leading-relaxed">
               BEYOND is built with age-appropriate safety defaults. Zero public phone/address exposure, zero pay-to-win ranking, and strictly no speculative gambling or trading features.
             </p>
+            <div className="pt-1">
+              <Link href="/about" className="text-xs text-[#283826] font-bold hover:underline">
+                Read Trust Charter & Ethics →
+              </Link>
+            </div>
           </div>
         </div>
 

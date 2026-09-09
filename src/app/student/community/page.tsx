@@ -12,7 +12,9 @@ import {
   Award,
   Send,
   Search,
-  CheckCircle2
+  CheckCircle2,
+  Flag,
+  ShieldCheck
 } from "lucide-react";
 
 interface PeerQuestion {
@@ -72,11 +74,22 @@ export default function CommunityPage() {
   const [newQuestionText, setNewQuestionText] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("Physics");
   const [showAskModal, setShowAskModal] = useState(false);
+  const [reportedPosts, setReportedPosts] = useState<string[]>([]);
+  const [reportNotification, setReportNotification] = useState<string | null>(null);
 
   const handleVote = (id: string) => {
     setPosts((prev) =>
       prev.map((p) => (p.id === id ? { ...p, helpfulVotes: p.helpfulVotes + 1 } : p))
     );
+  };
+
+  const handleReport = (id: string) => {
+    if (reportedPosts.includes(id)) return;
+    setReportedPosts((prev) => [...prev, id]);
+    setReportNotification("Question flagged for human moderator audit under the BEYOND Safety Charter.");
+    setTimeout(() => {
+      setReportNotification(null);
+    }, 4000);
   };
 
   const handleCreatePost = (e: React.FormEvent) => {
@@ -129,6 +142,43 @@ export default function CommunityPage() {
         </button>
       </div>
 
+      {/* Minor Safety & Academic Integrity Charter Banner */}
+      <div className="bg-[#283826] text-[#F7F5F0] rounded-2xl p-4 sm:p-5 border border-[#C8A95B]/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-[#C8A95B]/20 text-[#C8A95B] flex items-center justify-center shrink-0 mt-0.5">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-accent font-bold text-sm text-[#F7F5F0]">
+                BEYOND Minor Safety & Academic Integrity Charter
+              </h3>
+              <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-[#C8A95B]/20 text-[#C8A95B] font-bold">
+                Zero Tolerance
+              </span>
+            </div>
+            <p className="text-xs text-[#F7F5F0]/80 leading-relaxed max-w-3xl">
+              All peer interactions are strictly moderated for minor safety, conceptual rigor, and mutual respect. Exam paper leakages, homework cheating, toxic behavior, and harassment result in immediate permanent account suspension.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {reportNotification && (
+        <div className="bg-amber-50 border border-amber-300 text-amber-900 rounded-xl px-4 py-3 text-xs flex items-center justify-between gap-2 animate-fade-in shadow-sm">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
+            <span>{reportNotification}</span>
+          </div>
+          <button
+            onClick={() => setReportNotification(null)}
+            className="text-[10px] font-bold underline hover:opacity-80"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Peer Feed */}
       <div className="space-y-4">
         {posts.map((post) => (
@@ -180,6 +230,21 @@ export default function CommunityPage() {
                   <MessageSquare className="w-4 h-4" />
                   <span>{post.answersCount} Explanations</span>
                 </span>
+
+                <button
+                  type="button"
+                  onClick={() => handleReport(post.id)}
+                  disabled={reportedPosts.includes(post.id)}
+                  className={`flex items-center gap-1 text-[11px] transition-colors ${
+                    reportedPosts.includes(post.id)
+                      ? "text-emerald-700 font-bold"
+                      : "text-[#69704A] hover:text-red-700"
+                  }`}
+                  title="Report question for safety or academic integrity violation"
+                >
+                  <Flag className="w-3.5 h-3.5" />
+                  <span>{reportedPosts.includes(post.id) ? "Reported" : "Report"}</span>
+                </button>
               </div>
 
               <span className="text-[10px] font-mono text-[#C8A95B] font-bold">

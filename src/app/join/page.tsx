@@ -1,1 +1,5 @@
-export default function JoinPage() { return <main className="bg-beige text-olive-dark pt-28 pb-20"><div className="section-container max-w-3xl"><h1 className="heading-section">Join BEYOND</h1><p className="body-editorial mt-4 text-olive-muted">Create your student profile and get your first roadmap in minutes.</p><form className="mt-8 space-y-4"><div><label className="label-upper">Full Name</label><input className="w-full mt-2 p-3 rounded-card border border-olive-muted/30 bg-cream/60" placeholder="Arjun Kumar"/></div><div><label className="label-upper">Class</label><select className="w-full mt-2 p-3 rounded-card border border-olive-muted/30 bg-cream/60"><option>Class 11</option><option>Class 12</option></select></div><div><label className="label-upper">Exam Target</label><select className="w-full mt-2 p-3 rounded-card border border-olive-muted/30 bg-cream/60"><option>JEE Main</option><option>NEET UG</option><option>General Exploration</option></select></div><button type="button" className="btn-primary mt-4">Create Account</button></form></div></main>; }
+import { redirect } from "next/navigation";
+
+export default function JoinPage() {
+  redirect("/onboarding");
+}

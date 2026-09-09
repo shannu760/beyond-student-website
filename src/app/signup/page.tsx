@@ -1,1 +1,5 @@
-export default function SignupPage() { return <main className="bg-beige text-olive-dark pt-28 pb-20"><div className="section-container max-w-3xl"><h1 className="heading-section">Sign Up</h1><p className="body-editorial mt-4 text-olive-muted">Start with clarity. We will guide you step by step.</p></div></main>; }
+import { redirect } from "next/navigation";
+
+export default function SignupPage() {
+  redirect("/onboarding");
+}

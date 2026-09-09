@@ -77,6 +77,24 @@ const SCHOLARSHIPS: Scholarship[] = [
       "Family Income Certificate (< ₹8 Lakh/yr)"
     ],
     eligibility: "Female students admitted to 1st year B.Tech/Engineering degree programs."
+  },
+  {
+    id: "sch-4",
+    title: "Reliance Foundation Undergraduate Scholarship",
+    provider: "Reliance Foundation (Application via Buddy4Study)",
+    confidence: "Strong Match",
+    awardAmount: "₹2,00,000 Total Degree Grant",
+    deadline: "15th October 2026",
+    officialSourceUrl: "https://www.buddy4study.com/page/reliance-foundation-undergraduate-scholarships",
+    sourceOrganization: "Secondary Discovery • Buddy4Study Verified",
+    documents: [
+      "Class 10 & 12 Board Marksheet",
+      "Current Year College Admission & Bonafide Letter",
+      "Annual Family Income Proof (< ₹15 Lakh/yr, pref < ₹2.5L)",
+      "Aadhaar Identity Proof",
+      "Mandatory Aptitude Test Registration"
+    ],
+    eligibility: "1st year regular full-time undergraduate degree students across India who passed Class 12 with ≥ 60% marks."
   }
 ];
 
@@ -94,12 +112,20 @@ export default function OpportunitiesPage() {
               Scholarship & Opportunity Radar
             </h1>
             <span className="text-[10px] uppercase font-mono font-bold bg-emerald-100 text-emerald-900 px-2.5 py-0.5 rounded-full border border-emerald-300">
-              Verified NSP Data
+              Verified NSP AY 2026–27
             </span>
           </div>
           <p className="text-xs text-[#69704A] mt-1">
-            Grounded directly in National Scholarship Portal (NSP AY 2026-27) & official ministry schemes.
+            Grounded directly in National Scholarship Portal (NSP AY 2026–27) & official ministry schemes.
           </p>
+        </div>
+      </div>
+
+      {/* Official Transparency & Non-Guarantee Advisory */}
+      <div className="p-3.5 rounded-2xl bg-[#E8DCC3]/50 border border-[#3D4425]/15 text-[11px] text-[#3D4425] flex items-start sm:items-center gap-2.5">
+        <ShieldCheck className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5 sm:mt-0" />
+        <div className="leading-relaxed">
+          <strong className="text-[#252B18]">Official Source Transparency:</strong> National Scholarship Portal (NSP AY 2026–27) is the primary government authority. Buddy4Study schemes are secondary discovery links. BEYOND is an academic guidance network, not an application processing service or scholarship guarantee.
         </div>
       </div>
 

@@ -45,7 +45,7 @@ const SCHEMES: ScholarshipScheme[] = [
     eligibilitySummary: "1st year full-time regular UG students in any stream; passed Class 12 with ≥ 60% marks; family income < ₹15 Lakhs (preference < ₹2.5L); mandatory aptitude test.",
     officialSourceUrl: "https://www.buddy4study.com/page/reliance-foundation-undergraduate-scholarships",
     verificationStatus: "Verified AY 2026-27",
-    partnerBadge: "Buddy4Study Verified",
+    partnerBadge: "Secondary Discovery • Buddy4Study",
     documentChecklist: [
       "Class 10 & 12 Board Marksheet",
       "Current Year College Admission & Bonafide Letter",
@@ -67,7 +67,7 @@ const SCHEMES: ScholarshipScheme[] = [
     eligibilitySummary: "Students pursuing Diploma, ITI, Polytechnic, UG, or PG; scored ≥ 55% in qualifying exam; family annual income ≤ ₹2.5 Lakhs; preference for students facing crisis.",
     officialSourceUrl: "https://www.buddy4study.com/page/hdfc-bank-parivartans-ecss-programme",
     verificationStatus: "Verified AY 2026-27",
-    partnerBadge: "Buddy4Study Verified",
+    partnerBadge: "Secondary Discovery • Buddy4Study",
     documentChecklist: [
       "Previous Year Marksheets (Min 55%)",
       "Income Proof (Income Certificate / Salary Slip / Form 16)",
@@ -88,7 +88,7 @@ const SCHEMES: ScholarshipScheme[] = [
     eligibilitySummary: "Meritorious girl students admitted to 1st year professional degree programs (Engineering, MBBS, Architecture, LLB, Design); scored ≥ 75% in Class 12; family income ≤ ₹6 Lakhs.",
     officialSourceUrl: "https://www.buddy4study.com/page/kotak-kanya-scholarship",
     verificationStatus: "Verified AY 2026-27",
-    partnerBadge: "Buddy4Study Verified",
+    partnerBadge: "Secondary Discovery • Buddy4Study",
     documentChecklist: [
       "Class 12 Marksheet (≥ 75% aggregate)",
       "JEE Main / NEET / CLAT / State CET Rank Card",
@@ -109,7 +109,7 @@ const SCHEMES: ScholarshipScheme[] = [
     eligibilitySummary: "Class 11, 12, and undergraduate/polytechnic students enrolled in recognized institutions; scored ≥ 60% in previous academic year; family income ≤ ₹4 Lakhs.",
     officialSourceUrl: "https://www.buddy4study.com/page/tata-capital-pankh-scholarship-program",
     verificationStatus: "Verified AY 2026-27",
-    partnerBadge: "Buddy4Study Verified",
+    partnerBadge: "Secondary Discovery • Buddy4Study",
     documentChecklist: [
       "Photo Identity Proof (Aadhaar)",
       "Previous Academic Year Marksheet (≥ 60%)",
@@ -295,6 +295,14 @@ Verified Application Ledger 2026–27`;
               <Database className="w-3.5 h-3.5 text-[#283826]" />
               <span>Tracked: <strong>{Object.keys(trackedSchemes).length}</strong> in Supabase</span>
             </span>
+          </div>
+        </div>
+
+        {/* Official Source Transparency & Non-Guarantee Advisory */}
+        <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E1DDD2] text-[11px] text-[#556052] flex items-start sm:items-center gap-2.5">
+          <ShieldCheck className="w-4 h-4 text-emerald-800 shrink-0 mt-0.5 sm:mt-0" />
+          <div className="leading-relaxed font-sans">
+            <strong className="text-[#1A2219]">Official Source Transparency:</strong> National Scholarship Portal (NSP AY 2026–27) is the primary government authority. Buddy4Study opportunities are secondary discovery links. BEYOND is an academic guidance network, not an application processing service or scholarship guarantee.
           </div>
         </div>
 

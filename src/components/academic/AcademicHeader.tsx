@@ -18,7 +18,8 @@ import {
   Calendar,
   Award,
   Compass,
-  Crown
+  Crown,
+  ShieldCheck
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { DailyReportNotificationModal } from "@/components/academic/DailyReportNotificationModal";
@@ -123,6 +124,9 @@ export function AcademicHeader() {
               <Crown className="w-3.5 h-3.5 text-[#C8A95B]" />
               <span>Membership</span>
             </a>
+            <Link href="/about" className="hover:text-[#283826] transition-colors font-medium">
+              <span>About</span>
+            </Link>
             <Link href="/student/dashboard" className="text-[#283826] hover:text-[#364A33] transition-colors font-bold flex items-center gap-1">
               <Compass className="w-3.5 h-3.5 text-[#283826]" />
               <span>Hub</span>
@@ -327,6 +331,22 @@ export function AcademicHeader() {
             >
               <Compass className="w-4 h-4 text-[#283826]" />
               <span>Student Hub & Dashboard</span>
+            </Link>
+            <Link
+              href="/about"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
+            >
+              <ShieldCheck className="w-4 h-4 text-[#283826]" />
+              <span>About & Trust Charter</span>
+            </Link>
+            <Link
+              href="/how-it-works"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2.5 text-sm font-medium text-[#1A2219] py-1"
+            >
+              <Activity className="w-4 h-4 text-[#B07D4F]" />
+              <span>How BEYOND Works (4 Growth Loops)</span>
             </Link>
 
             <button
