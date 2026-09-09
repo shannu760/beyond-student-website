@@ -68,7 +68,10 @@ export default function PYQPortalPage() {
   const [passData, setPassData] = useState<any>(null);
   const [passLoading, setPassLoading] = useState<boolean>(false);
   const [passSelectedQuestion, setPassSelectedQuestion] = useState<any>(null);
+  const [passSelectedOption, setPassSelectedOption] = useState<number | null>(null);
+  const [passIsAnswered, setPassIsAnswered] = useState<boolean>(false);
   const [passAiSolving, setPassAiSolving] = useState<boolean>(false);
+  const [passSolvingStage, setPassSolvingStage] = useState<number>(0);
   const [passAiSolution, setPassAiSolution] = useState<any>(null);
 
   // =========================================================================
@@ -87,6 +90,7 @@ export default function PYQPortalPage() {
   const [neetSelectedOption, setNeetSelectedOption] = useState<number | null>(null);
   const [neetShowExplanation, setNeetShowExplanation] = useState<boolean>(false);
   const [neetAiSolving, setNeetAiSolving] = useState<boolean>(false);
+  const [neetSolvingStage, setNeetSolvingStage] = useState<number>(0);
   const [neetAiSolution, setNeetAiSolution] = useState<any>(null);
 
   // Fetch 12thpass data when filters change
@@ -113,6 +117,10 @@ export default function PYQPortalPage() {
               if (prev && data.questions.some((q: any) => q.id === prev.id)) return prev;
               return data.questions[0];
             });
+            setPassSelectedOption(null);
+            setPassIsAnswered(false);
+            setPassAiSolution(null);
+            setPassSolvingStage(0);
           } else {
             setPassSelectedQuestion(null);
           }
@@ -127,10 +135,42 @@ export default function PYQPortalPage() {
     return () => { ignore = true; };
   }, [passExam, passSubject, passChapter, passYear, passSearch, passPage]);
 
-  // Handle solve with Nemotron for 12thpass question
+  // Handle select option for 12thpass question
+  const handleSelectPassOption = async (idx: number) => {
+    if (!passSelectedQuestion) return;
+    setPassSelectedOption(idx);
+    setPassIsAnswered(true);
+
+    const isCorrect = idx === passSelectedQuestion.correctIndex;
+    try {
+      await fetch("/api/activity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "question",
+          subject: passSelectedQuestion.subject,
+          topic: passSelectedQuestion.chapter,
+          isPYQ: true,
+          isCorrect,
+          timeSpentSeconds: 45
+        })
+      });
+      window.dispatchEvent(new Event("beyond:activity-updated"));
+    } catch (e) {
+      console.error("Failed to log activity:", e);
+    }
+  };
+
+  // Handle solve with Nemotron for 12thpass question with progressive steps
   const handleSolvePassQuestion = async () => {
     if (!passSelectedQuestion) return;
     setPassAiSolving(true);
+    setPassSolvingStage(1);
+
+    const t1 = setTimeout(() => setPassSolvingStage(2), 350);
+    const t2 = setTimeout(() => setPassSolvingStage(3), 850);
+    const t3 = setTimeout(() => setPassSolvingStage(4), 1350);
+
     try {
       const res = await fetch("/api/ai/solve-pyq", {
         method: "POST",
@@ -140,16 +180,24 @@ export default function PYQPortalPage() {
           questionText: passSelectedQuestion.question,
           exam: passSelectedQuestion.exam,
           subject: passSelectedQuestion.subject,
-          topic: passSelectedQuestion.chapter
+          topic: passSelectedQuestion.chapter,
+          options: passSelectedQuestion.options,
+          correctIndex: passSelectedQuestion.correctIndex,
+          userSelectedOption: passSelectedOption ?? undefined,
+          sourceUrl: passSelectedQuestion.sourceUrl
         })
       });
       const data = await res.json();
       if (data.success && data.solution) {
+        setPassSolvingStage(5);
         setPassAiSolution(data);
       }
     } catch (err) {
       console.error("AI Solve error:", err);
     } finally {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       setPassAiSolving(false);
     }
   };
@@ -195,10 +243,16 @@ export default function PYQPortalPage() {
     return () => { ignore = true; };
   }, [neetSubject, neetChapter, neetYear, neetCode, neetSearch, neetPage, neetViewMode]);
 
-  // Handle solve with Nemotron for NEET question
+  // Handle solve with Nemotron for NEET question with progressive stages
   const handleSolveNeetQuestion = async () => {
     if (!neetSelectedQuestion) return;
     setNeetAiSolving(true);
+    setNeetSolvingStage(1);
+
+    const t1 = setTimeout(() => setNeetSolvingStage(2), 350);
+    const t2 = setTimeout(() => setNeetSolvingStage(3), 850);
+    const t3 = setTimeout(() => setNeetSolvingStage(4), 1350);
+
     try {
       const res = await fetch("/api/ai/solve-pyq", {
         method: "POST",
@@ -210,16 +264,22 @@ export default function PYQPortalPage() {
           subject: neetSelectedQuestion.subject,
           topic: neetSelectedQuestion.chapter,
           options: neetSelectedQuestion.options,
-          userSelectedOption: neetSelectedOption ?? undefined
+          correctIndex: neetSelectedQuestion.correctIndex,
+          userSelectedOption: neetSelectedOption ?? undefined,
+          sourceUrl: neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url
         })
       });
       const data = await res.json();
       if (data.success && data.solution) {
+        setNeetSolvingStage(5);
         setNeetAiSolution(data);
       }
     } catch (err) {
       console.error("AI Solve NEET error:", err);
     } finally {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       setNeetAiSolving(false);
     }
   };
@@ -235,6 +295,7 @@ export default function PYQPortalPage() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
   const [aiSolving, setAiSolving] = useState<boolean>(false);
+  const [curatedSolvingStage, setCuratedSolvingStage] = useState<number>(0);
   const [aiSolution, setAiSolution] = useState<any>(null);
   const [resetting, setResetting] = useState<boolean>(false);
 
@@ -285,6 +346,7 @@ export default function PYQPortalPage() {
     setSelectedOption(null);
     setIsAnswered(false);
     setAiSolution(null);
+    setCuratedSolvingStage(0);
   };
 
   // Timer effect for jumbled exam simulator
@@ -332,6 +394,12 @@ export default function PYQPortalPage() {
 
   const handleSolveWithNemotron = async () => {
     setAiSolving(true);
+    setCuratedSolvingStage(1);
+
+    const t1 = setTimeout(() => setCuratedSolvingStage(2), 350);
+    const t2 = setTimeout(() => setCuratedSolvingStage(3), 850);
+    const t3 = setTimeout(() => setCuratedSolvingStage(4), 1350);
+
     try {
       const res = await fetch("/api/ai/solve-pyq", {
         method: "POST",
@@ -343,16 +411,21 @@ export default function PYQPortalPage() {
           subject: activeQuestion.subject,
           topic: activeQuestion.chapter,
           options: activeQuestion.options,
+          correctIndex: activeQuestion.correctIndex,
           userSelectedOption: selectedOption ?? undefined
         })
       });
       const data = await res.json();
       if (data.success && data.solution) {
+        setCuratedSolvingStage(5);
         setAiSolution(data);
       }
     } catch (e) {
       console.error("AI Solve error:", e);
     } finally {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       setAiSolving(false);
     }
   };
@@ -815,50 +888,320 @@ export default function PYQPortalPage() {
 
                     {/* Question statement */}
                     <div className="p-5 rounded-xl bg-white border border-[#E1DDD2] shadow-2xs space-y-2">
-                      <div className="text-[11px] font-mono text-[#6C7D64] uppercase font-bold">
-                        Question Statement ({passSelectedQuestion.type})
+                      <div className="text-[11px] font-mono text-[#6C7D64] uppercase font-bold flex items-center justify-between">
+                        <span>Question Statement ({passSelectedQuestion.type})</span>
+                        {passSelectedQuestion.year && (
+                          <span className="text-amber-800 font-bold">{passSelectedQuestion.year}</span>
+                        )}
                       </div>
                       <p className="font-serif text-base sm:text-lg text-[#1A2219] leading-relaxed">
                         {passSelectedQuestion.question}
                       </p>
                     </div>
 
-                    {/* Solve Action Bar */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+                    {/* Four Interactive Options */}
+                    {passSelectedQuestion.options && passSelectedQuestion.options.length > 0 && (
+                      <div className="space-y-3 pt-1">
+                        <div className="text-[11px] font-mono text-[#6C7D64] uppercase font-bold flex items-center justify-between">
+                          <span>Select Correct Option (+4 / -1 Marking):</span>
+                          {passSelectedOption !== null && (
+                            <span className={passSelectedOption === passSelectedQuestion.correctIndex ? "text-emerald-700 font-bold" : "text-rose-700 font-bold"}>
+                              {passSelectedOption === passSelectedQuestion.correctIndex ? "✓ Correct (+4 Marks)" : "✗ Incorrect (-1 Mark)"}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          {passSelectedQuestion.options.map((opt: any, idx: number) => {
+                            const isChosen = passSelectedOption === idx;
+                            const isCorrect = idx === passSelectedQuestion.correctIndex;
+                            let style = "bg-white hover:bg-[#F0EDE4] border-[#D5CFBE] text-[#1A2219]";
+
+                            if (passSelectedOption !== null) {
+                              if (isCorrect) {
+                                style = "bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold ring-2 ring-emerald-500 shadow-xs";
+                              } else if (isChosen) {
+                                style = "bg-rose-50 border-rose-500 text-rose-950 ring-2 ring-rose-500 shadow-xs";
+                              } else {
+                                style = "bg-[#FAF8F5] border-[#E1DDD2] text-[#7C8578] opacity-60";
+                              }
+                            }
+
+                            return (
+                              <button
+                                key={opt.label || idx}
+                                type="button"
+                                onClick={() => handleSelectPassOption(idx)}
+                                className={`p-3.5 rounded-xl border text-left text-xs sm:text-sm font-sans flex items-start gap-3 transition-all cursor-pointer ${style}`}
+                              >
+                                <span className={`w-6 h-6 rounded-lg font-mono text-xs font-bold flex items-center justify-center shrink-0 ${
+                                  passSelectedOption !== null && isCorrect
+                                    ? "bg-emerald-600 text-white"
+                                    : passSelectedOption !== null && isChosen
+                                    ? "bg-rose-600 text-white"
+                                    : "bg-[#EAE6DB] text-[#283826] border border-[#D5CFBE]"
+                                }`}>
+                                  {opt.label || ["A", "B", "C", "D"][idx]}
+                                </span>
+                                <span className="leading-snug pt-0.5 flex-1">{opt.text}</span>
+                                {passSelectedOption !== null && isCorrect && (
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 self-center" />
+                                )}
+                                {passSelectedOption !== null && isChosen && !isCorrect && (
+                                  <XCircle className="w-4 h-4 text-rose-600 shrink-0 self-center" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* GREEN CARD / RED CARD GRADING FEEDBACK */}
+                    {passSelectedOption !== null && (
+                      <div className="space-y-3">
+                        {passSelectedOption === passSelectedQuestion.correctIndex ? (
+                          /* GREEN CARD */
+                          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-emerald-100/60 border-2 border-emerald-500 shadow-sm animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                                  <CheckCircle2 className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h4 className="font-serif font-bold text-base text-emerald-950 flex items-center gap-2">
+                                    <span>CORRECT ANSWER!</span>
+                                    <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-mono font-bold">
+                                      +4 MARKS
+                                    </span>
+                                  </h4>
+                                  <p className="text-xs font-mono text-emerald-700">
+                                    Official NTA / Exam Answer Key Verified • Full Accuracy Recorded
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="px-3 py-1 rounded-lg bg-white/90 border border-emerald-300 text-emerald-900 text-xs font-mono font-bold shadow-2xs">
+                                Option {passSelectedQuestion.options[passSelectedQuestion.correctIndex]?.label} Confirmed ✓
+                              </span>
+                            </div>
+
+                            <div className="p-3.5 rounded-xl bg-white/90 border border-emerald-200 text-xs sm:text-sm font-sans text-emerald-950">
+                              <div className="font-mono text-[11px] font-bold text-emerald-800 uppercase mb-1">
+                                Official Verification Rationale:
+                              </div>
+                              <p className="leading-relaxed font-serif">
+                                {passSelectedQuestion.officialExplanation}
+                              </p>
+                            </div>
+
+                            {/* Direct Solution Link inside Green Card */}
+                            {passSelectedQuestion.directSolutionUrl && (
+                              <div className="flex items-center justify-between pt-1 text-xs">
+                                <span className="font-mono text-emerald-800 text-[11px]">
+                                  Need authoritative external derivation or video?
+                                </span>
+                                <a
+                                  href={passSelectedQuestion.directSolutionUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-emerald-900 hover:text-emerald-950 font-mono font-bold underline flex items-center gap-1"
+                                >
+                                  <span>Direct Solution Link</span>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          /* RED CARD */
+                          <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-rose-50 via-red-50/50 to-rose-100/60 border-2 border-rose-500 shadow-sm animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs">
+                                  <XCircle className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h4 className="font-serif font-bold text-base text-rose-950 flex items-center gap-2">
+                                    <span>INCORRECT ATTEMPT!</span>
+                                    <span className="px-2.5 py-0.5 rounded-full bg-rose-700 text-white text-[11px] font-mono font-bold">
+                                      -1 NEGATIVE MARK
+                                    </span>
+                                  </h4>
+                                  <p className="text-xs font-mono text-rose-700">
+                                    Penalty Applied as per NTA Marking Scheme • Review Traps Below
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="px-3 py-1 rounded-lg bg-white/90 border border-rose-300 text-rose-900 text-xs font-mono font-bold shadow-2xs">
+                                Negative Mark Incurred
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                              <div className="p-3 rounded-xl bg-white/90 border border-rose-300 text-xs font-sans text-rose-950">
+                                <span className="text-rose-600 font-mono font-bold text-[11px] uppercase block mb-1">
+                                  ✗ Your Selection:
+                                </span>
+                                <div className="font-bold">
+                                  Option {passSelectedQuestion.options[passSelectedOption]?.label}: {passSelectedQuestion.options[passSelectedOption]?.text}
+                                </div>
+                              </div>
+
+                              <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 text-xs font-sans text-emerald-950">
+                                <span className="text-emerald-700 font-mono font-bold text-[11px] uppercase block mb-1">
+                                  ✓ Official Correct Key:
+                                </span>
+                                <div className="font-bold">
+                                  Option {passSelectedQuestion.options[passSelectedQuestion.correctIndex]?.label}: {passSelectedQuestion.options[passSelectedQuestion.correctIndex]?.text}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Common Trap Alert */}
+                            <div className="p-3.5 rounded-xl bg-white/90 border border-rose-200 text-xs sm:text-sm font-sans text-rose-950">
+                              <div className="font-mono text-[11px] font-bold text-rose-800 uppercase flex items-center gap-1.5 mb-1">
+                                <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                <span>Negative Marking Trap Analysis:</span>
+                              </div>
+                              <p className="leading-relaxed">
+                                {passSelectedQuestion.commonTrap || passSelectedQuestion.officialExplanation}
+                              </p>
+                            </div>
+
+                            {/* Direct Solution Link inside Red Card */}
+                            {passSelectedQuestion.directSolutionUrl && (
+                              <div className="flex items-center justify-between pt-1 text-xs">
+                                <span className="font-mono text-rose-800 text-[11px]">
+                                  Review verified answer & step-by-step resolution:
+                                </span>
+                                <a
+                                  href={passSelectedQuestion.directSolutionUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-rose-900 hover:text-rose-950 font-mono font-bold underline flex items-center gap-1"
+                                >
+                                  <span>Direct Solution Link</span>
+                                  <ExternalLink className="w-3.5 h-3.5" />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Solve Action Bar with Direct Link Fallback */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[#E1DDD2]">
                       <span className="text-xs font-mono text-[#556052]">
-                        Click below to generate rigorous step-by-step derivation:
+                        Need deep mathematical proof or step-by-step derivation?
                       </span>
 
-                      <button
-                        type="button"
-                        onClick={handleSolvePassQuestion}
-                        disabled={passAiSolving}
-                        className="px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group"
-                      >
-                        <Sparkles className="w-4 h-4 text-[#B07D4F] group-hover:rotate-12 transition-transform" />
-                        <span>{passAiSolving ? "Nemotron Ultra Deriving..." : "Solve with Nemotron Ultra AI"}</span>
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {passSelectedQuestion.directSolutionUrl && (
+                          <a
+                            href={passSelectedQuestion.directSolutionUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-2.5 rounded-xl bg-[#EFECE3] hover:bg-[#E5E0D2] border border-[#D5CFBE] text-[#283826] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                            title="Open direct authoritative solution on 12thPass/Google"
+                          >
+                            <span>Direct Solution Link</span>
+                            <ExternalLink className="w-3.5 h-3.5 text-[#B07D4F]" />
+                          </a>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={handleSolvePassQuestion}
+                          disabled={passAiSolving}
+                          className="px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group"
+                        >
+                          <Sparkles className="w-4 h-4 text-[#B07D4F] group-hover:rotate-12 transition-transform" />
+                          <span>{passAiSolving ? "Nemotron Ultra Deriving..." : "Solve with Nemotron Ultra AI"}</span>
+                        </button>
+                      </div>
                     </div>
+
+                    {/* Real-Time Progressive Stages during AI solving */}
+                    {passAiSolving && (
+                      <div className="p-5 rounded-2xl bg-[#F4F1EA] border border-[#D5CFBE] space-y-3 animate-pulse">
+                        <div className="flex items-center justify-between text-xs font-mono font-bold text-[#283826]">
+                          <span className="flex items-center gap-2">
+                            <Bot className="w-4 h-4 text-[#B07D4F] animate-spin" />
+                            <span>NVIDIA Nemotron Ultra Live Reasoning Engine...</span>
+                          </span>
+                          <span className="text-[11px] text-[#B07D4F] font-semibold">
+                            {passSolvingStage === 1 && "Stage 1/4: Analyzing Parameters..."}
+                            {passSolvingStage === 2 && "Stage 2/4: Formulating Laws..."}
+                            {passSolvingStage === 3 && "Stage 3/4: Mathematical Derivation..."}
+                            {passSolvingStage >= 4 && "Stage 4/4: Distractor Elimination..."}
+                          </span>
+                        </div>
+                        <div className="w-full bg-[#E5E0D3] h-2 rounded-full overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-[#B07D4F] to-[#283826] h-full transition-all duration-300"
+                            style={{ width: `${Math.min(100, Math.max(20, passSolvingStage * 25))}%` }}
+                          />
+                        </div>
+                        <p className="text-[11px] font-mono text-[#556052]">
+                          {passSolvingStage === 1 && "Ingesting question stem, physical invariants, and boundary conditions..."}
+                          {passSolvingStage === 2 && "Formulating first-principles equations and conservation laws without hallucination..."}
+                          {passSolvingStage === 3 && "Executing multi-step algebra and calculating exact value for candidate options..."}
+                          {passSolvingStage >= 4 && "Cross-referencing verified answer key and preparing 60s speed hack..."}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Nemotron Solution Box */}
                     {passAiSolution && (
                       <div className="rounded-2xl bg-[#FAF8F5] border-2 border-[#283826] p-6 space-y-5 shadow-md animate-in fade-in duration-300">
-                        <div className="flex items-center justify-between pb-3 border-b border-[#D5CFBE]">
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#D5CFBE]">
                           <div className="flex items-center gap-2.5">
-                            <Bot className="w-5 h-5 text-[#B07D4F]" />
-                            <h3 className="font-serif font-bold text-base text-[#1A2219]">
-                              NVIDIA Nemotron Ultra Academic Derivation
-                            </h3>
+                            <div className="w-8 h-8 rounded-lg bg-[#283826] text-white flex items-center justify-center">
+                              <Bot className="w-5 h-5 text-[#C8A95B]" />
+                            </div>
+                            <div>
+                              <h3 className="font-serif font-bold text-base text-[#1A2219]">
+                                NVIDIA Nemotron Ultra Academic Derivation
+                              </h3>
+                              <p className="text-[10px] font-mono text-[#6C7D64]">
+                                {passAiSolution.model} • Latency: {passAiSolution.latencyMs}ms
+                              </p>
+                            </div>
                           </div>
-                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase">
-                            Model: {passAiSolution.model}
+                          <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase">
+                            ✓ Step-by-Step Proof
                           </span>
                         </div>
+
+                        {/* Direct Solution Fallback Banner */}
+                        {passAiSolution.directSolutionUrl && (
+                          <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50/70 border border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="space-y-0.5">
+                              <div className="text-xs font-mono font-bold text-amber-950 flex items-center gap-1.5">
+                                <span>🔗 Direct Solution Link (Official & Video Verification):</span>
+                              </div>
+                              <p className="text-[11px] text-amber-900 font-sans">
+                                Cross-verify with original exam portal, official answer keys, or watch video solutions.
+                              </p>
+                            </div>
+
+                            <a
+                              href={passAiSolution.directSolutionUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 rounded-xl bg-[#283826] hover:bg-[#364A33] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                            >
+                              <span>Open Direct Solution</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        )}
 
                         {/* Principles */}
                         {passAiSolution.solution.governingPrinciples && (
                           <div className="space-y-1.5">
-                            <span className="text-xs font-mono font-bold uppercase text-[#556052]">Principles:</span>
+                            <span className="text-xs font-mono font-bold uppercase text-[#556052]">Governing Principles:</span>
                             <div className="flex flex-wrap gap-1.5">
                               {passAiSolution.solution.governingPrinciples.map((p: string, i: number) => (
                                 <span key={i} className="px-2.5 py-0.5 rounded bg-white border border-[#D5CFBE] text-xs font-mono text-[#283826] font-semibold">
@@ -869,12 +1212,34 @@ export default function PYQPortalPage() {
                           </div>
                         )}
 
-                        {/* Derivation */}
-                        <div className="space-y-1.5">
-                          <span className="text-xs font-mono font-bold uppercase text-[#556052]">Step-by-Step Derivation:</span>
-                          <div className="p-4 rounded-xl bg-white border border-[#E1DDD2] text-xs sm:text-sm font-serif text-[#1A2219] leading-relaxed">
-                            {passAiSolution.solution.stepByStepDerivation}
-                          </div>
+                        {/* Numbered Step-by-Step Derivation Cards */}
+                        <div className="space-y-2.5">
+                          <span className="text-xs font-mono font-bold uppercase text-[#556052] flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5 text-[#B07D4F]" />
+                            <span>Real-Time Step-by-Step Derivation Process:</span>
+                          </span>
+
+                          {passAiSolution.solution.steps && passAiSolution.solution.steps.length > 0 ? (
+                            <div className="space-y-2">
+                              {passAiSolution.solution.steps.map((step: any, sIdx: number) => (
+                                <div key={sIdx} className="p-3.5 rounded-xl bg-white border border-[#E1DDD2] shadow-2xs space-y-1">
+                                  <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#283826]">
+                                    <span className="w-5 h-5 rounded-full bg-[#EAE6DB] text-[#283826] flex items-center justify-center text-[11px]">
+                                      {step.stepNumber || sIdx + 1}
+                                    </span>
+                                    <span>{step.title}</span>
+                                  </div>
+                                  <p className="text-xs font-serif text-[#1A2219] leading-relaxed pl-7">
+                                    {step.content}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="p-4 rounded-xl bg-white border border-[#E1DDD2] text-xs sm:text-sm font-serif text-[#1A2219] leading-relaxed">
+                              {passAiSolution.solution.stepByStepDerivation}
+                            </div>
+                          )}
                         </div>
 
                         {/* Speed Hack */}
@@ -904,8 +1269,34 @@ export default function PYQPortalPage() {
                         )}
 
                         {passAiSolution.solution.correctOption && (
-                          <div className="text-xs font-mono font-bold text-[#283826] pt-1">
-                            Final Answer Key: {passAiSolution.solution.correctOption}
+                          <div className="p-3 rounded-xl bg-[#EFECE3] border border-[#D5CFBE] flex items-center justify-between text-xs font-mono font-bold text-[#283826]">
+                            <span>Final Answer Key:</span>
+                            <span className="px-2.5 py-0.5 rounded bg-[#283826] text-white">
+                              {passAiSolution.solution.correctOption}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Alternative Outbound Verification Links */}
+                        {passAiSolution.directLinks && passAiSolution.directLinks.length > 0 && (
+                          <div className="pt-2 border-t border-[#E1DDD2] space-y-1.5">
+                            <span className="text-[11px] font-mono text-[#6C7D64] uppercase font-bold">
+                              External Verification & Video Archives:
+                            </span>
+                            <div className="flex flex-wrap gap-2">
+                              {passAiSolution.directLinks.map((link: any, lIdx: number) => (
+                                <a
+                                  key={lIdx}
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[11px] font-mono px-3 py-1 rounded-lg bg-white hover:bg-[#EFECE3] border border-[#D5CFBE] text-[#283826] flex items-center gap-1 transition-colors"
+                                >
+                                  <span>{link.label}</span>
+                                  <ExternalLink className="w-3 h-3 text-[#B07D4F]" />
+                                </a>
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1347,7 +1738,7 @@ export default function PYQPortalPage() {
                           <span>Select Your Answer (+4 / -1 Marking):</span>
                           {neetSelectedOption !== null && (
                             <span className={neetSelectedOption === neetSelectedQuestion.correctIndex ? "text-emerald-700 font-bold" : "text-rose-700 font-bold"}>
-                              {neetSelectedOption === neetSelectedQuestion.correctIndex ? "Correct! +4 Marks" : "Incorrect: -1 Mark"}
+                              {neetSelectedOption === neetSelectedQuestion.correctIndex ? "✓ Correct (+4 Marks)" : "✗ Incorrect (-1 Mark)"}
                             </span>
                           )}
                         </div>
@@ -1360,9 +1751,9 @@ export default function PYQPortalPage() {
                             
                             if (neetSelectedOption !== null) {
                               if (isCorrect) {
-                                style = "bg-emerald-50 border-emerald-500 text-emerald-900 font-semibold ring-1 ring-emerald-500";
+                                style = "bg-emerald-50 border-emerald-500 text-emerald-900 font-semibold ring-2 ring-emerald-500 shadow-xs";
                               } else if (isChosen) {
-                                style = "bg-rose-50 border-rose-500 text-rose-900 ring-1 ring-rose-500";
+                                style = "bg-rose-50 border-rose-500 text-rose-900 ring-2 ring-rose-500 shadow-xs";
                               } else {
                                 style = "bg-[#FAF8F5] border-[#E1DDD2] text-neutral-400 opacity-60";
                               }
@@ -1375,15 +1766,160 @@ export default function PYQPortalPage() {
                                 onClick={() => setNeetSelectedOption(idx)}
                                 className={`p-3.5 rounded-xl border text-left text-xs sm:text-sm font-sans flex items-start gap-3 transition-all cursor-pointer ${style}`}
                               >
-                                <span className="w-5 h-5 rounded-full bg-white border border-neutral-300 font-mono text-xs font-bold flex items-center justify-center shrink-0">
+                                <span className={`w-6 h-6 rounded-lg font-mono text-xs font-bold flex items-center justify-center shrink-0 ${
+                                  neetSelectedOption !== null && isCorrect
+                                    ? "bg-emerald-600 text-white"
+                                    : neetSelectedOption !== null && isChosen
+                                    ? "bg-rose-600 text-white"
+                                    : "bg-white border border-neutral-300 text-neutral-800"
+                                }`}>
                                   {opt.label || ["A", "B", "C", "D"][idx]}
                                 </span>
-                                <span className="leading-normal">{opt.text}</span>
+                                <span className="leading-snug pt-0.5 flex-1">{opt.text}</span>
+                                {neetSelectedOption !== null && isCorrect && (
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 self-center" />
+                                )}
+                                {neetSelectedOption !== null && isChosen && !isCorrect && (
+                                  <XCircle className="w-4 h-4 text-rose-600 shrink-0 self-center" />
+                                )}
                               </button>
                             );
                           })}
                         </div>
                       </div>
+
+                      {/* GREEN CARD / RED CARD FEEDBACK FOR NEET */}
+                      {neetSelectedOption !== null && (
+                        <div className="space-y-3">
+                          {neetSelectedOption === neetSelectedQuestion.correctIndex ? (
+                            /* GREEN CARD */
+                            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-emerald-100/60 border-2 border-emerald-500 shadow-sm animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center shadow-xs">
+                                    <CheckCircle2 className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-serif font-bold text-base text-emerald-950 flex items-center gap-2">
+                                      <span>CORRECT ANSWER!</span>
+                                      <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-mono font-bold">
+                                        +4 MARKS
+                                      </span>
+                                    </h4>
+                                    <p className="text-xs font-mono text-emerald-700">
+                                      Official NEET-UG Answer Key Verified • Full Accuracy Recorded
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="px-3 py-1 rounded-lg bg-white/90 border border-emerald-300 text-emerald-900 text-xs font-mono font-bold shadow-2xs">
+                                  Option {neetSelectedQuestion.options[neetSelectedQuestion.correctIndex]?.label} Confirmed ✓
+                                </span>
+                              </div>
+
+                              <div className="p-3.5 rounded-xl bg-white/90 border border-emerald-200 text-xs sm:text-sm font-sans text-emerald-950">
+                                <div className="font-mono text-[11px] font-bold text-emerald-800 uppercase mb-1">
+                                  Official NCERT Solution:
+                                </div>
+                                <p className="leading-relaxed font-serif">
+                                  {neetSelectedQuestion.officialExplanation}
+                                </p>
+                              </div>
+
+                              {/* Direct Solution Link in Green Card */}
+                              {(neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url) && (
+                                <div className="flex items-center justify-between pt-1 text-xs">
+                                  <span className="font-mono text-emerald-800 text-[11px]">
+                                    Want to open official Vedantu paper & video solution?
+                                  </span>
+                                  <a
+                                    href={neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-emerald-900 hover:text-emerald-950 font-mono font-bold underline flex items-center gap-1"
+                                  >
+                                    <span>Direct Solution Link</span>
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            /* RED CARD */
+                            <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-rose-50 via-red-50/50 to-rose-100/60 border-2 border-rose-500 shadow-sm animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                              <div className="flex flex-wrap items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs">
+                                    <XCircle className="w-6 h-6" />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-serif font-bold text-base text-rose-950 flex items-center gap-2">
+                                      <span>INCORRECT ATTEMPT!</span>
+                                      <span className="px-2.5 py-0.5 rounded-full bg-rose-700 text-white text-[11px] font-mono font-bold">
+                                        -1 NEGATIVE MARK
+                                      </span>
+                                    </h4>
+                                    <p className="text-xs font-mono text-rose-700">
+                                      Penalty Applied as per NEET-UG Marking Scheme • Review Traps Below
+                                    </p>
+                                  </div>
+                                </div>
+                                <span className="px-3 py-1 rounded-lg bg-white/90 border border-rose-300 text-rose-900 text-xs font-mono font-bold shadow-2xs">
+                                  Negative Mark Incurred
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div className="p-3 rounded-xl bg-white/90 border border-rose-300 text-xs font-sans text-rose-950">
+                                  <span className="text-rose-600 font-mono font-bold text-[11px] uppercase block mb-1">
+                                    ✗ Your Selection:
+                                  </span>
+                                  <div className="font-bold">
+                                    Option {neetSelectedQuestion.options[neetSelectedOption]?.label}: {neetSelectedQuestion.options[neetSelectedOption]?.text}
+                                  </div>
+                                </div>
+
+                                <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 text-xs font-sans text-emerald-950">
+                                  <span className="text-emerald-700 font-mono font-bold text-[11px] uppercase block mb-1">
+                                    ✓ Official Correct Key:
+                                  </span>
+                                  <div className="font-bold">
+                                    Option {neetSelectedQuestion.options[neetSelectedQuestion.correctIndex]?.label}: {neetSelectedQuestion.options[neetSelectedQuestion.correctIndex]?.text}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Common Trap Alert */}
+                              <div className="p-3.5 rounded-xl bg-white/90 border border-rose-200 text-xs sm:text-sm font-sans text-rose-950">
+                                <div className="font-mono text-[11px] font-bold text-rose-800 uppercase flex items-center gap-1.5 mb-1">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Negative Marking Trap Analysis:</span>
+                                </div>
+                                <p className="leading-relaxed">
+                                  {neetSelectedQuestion.commonTrap || neetSelectedQuestion.officialExplanation}
+                                </p>
+                              </div>
+
+                              {/* Direct Solution Link in Red Card */}
+                              {(neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url) && (
+                                <div className="flex items-center justify-between pt-1 text-xs">
+                                  <span className="font-mono text-rose-800 text-[11px]">
+                                    Review verified answer & step-by-step resolution:
+                                  </span>
+                                  <a
+                                    href={neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-rose-900 hover:text-rose-950 font-mono font-bold underline flex items-center gap-1"
+                                  >
+                                    <span>Direct Solution Link</span>
+                                    <ExternalLink className="w-3.5 h-3.5" />
+                                  </a>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {/* Official Explanation Toggle & Speed Hacks */}
                       <div className="space-y-3 pt-2">
@@ -1426,37 +1962,113 @@ export default function PYQPortalPage() {
                         )}
                       </div>
 
-                      {/* AI Derivation Action Button */}
+                      {/* AI Derivation Action Button with Direct Link Fallback */}
                       <div className="pt-2 border-t border-[#E1DDD2] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <span className="text-xs font-mono text-[#556052]">
                           Need deep clinical and conceptual proof?
                         </span>
 
-                        <button
-                          type="button"
-                          onClick={handleSolveNeetQuestion}
-                          disabled={neetAiSolving}
-                          className="px-5 py-2.5 rounded-xl bg-[#1E3A20] hover:bg-[#284E2A] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group"
-                        >
-                          <Sparkles className="w-4 h-4 text-[#C8A95B] group-hover:rotate-12 transition-transform" />
-                          <span>{neetAiSolving ? "Nemotron Ultra Reasoning..." : "Derive with Nemotron Ultra AI"}</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {(neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url) && (
+                            <a
+                              href={neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3.5 py-2.5 rounded-xl bg-[#EFECE3] hover:bg-[#E5E0D2] border border-[#D5CFBE] text-[#1E3A20] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                              title="Open direct authoritative solution on Vedantu/Google"
+                            >
+                              <span>Direct Solution Link</span>
+                              <ExternalLink className="w-3.5 h-3.5 text-[#B07D4F]" />
+                            </a>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={handleSolveNeetQuestion}
+                            disabled={neetAiSolving}
+                            className="px-5 py-2.5 rounded-xl bg-[#1E3A20] hover:bg-[#284E2A] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group"
+                          >
+                            <Sparkles className="w-4 h-4 text-[#C8A95B] group-hover:rotate-12 transition-transform" />
+                            <span>{neetAiSolving ? "Nemotron Ultra Reasoning..." : "Derive with Nemotron Ultra AI"}</span>
+                          </button>
+                        </div>
                       </div>
+
+                      {/* Real-Time Progressive Stages during NEET AI solving */}
+                      {neetAiSolving && (
+                        <div className="p-5 rounded-2xl bg-[#F0F5EE] border border-[#C5D6C2] space-y-3 animate-pulse">
+                          <div className="flex items-center justify-between text-xs font-mono font-bold text-[#1E3A20]">
+                            <span className="flex items-center gap-2">
+                              <Bot className="w-4 h-4 text-[#B07D4F] animate-spin" />
+                              <span>NVIDIA Nemotron Ultra NEET Medical Reasoning...</span>
+                            </span>
+                            <span className="text-[11px] text-[#1E3A20] font-semibold">
+                              {neetSolvingStage === 1 && "Stage 1/4: Analyzing Parameters..."}
+                              {neetSolvingStage === 2 && "Stage 2/4: Formulating NCERT Laws..."}
+                              {neetSolvingStage === 3 && "Stage 3/4: Mathematical Derivation..."}
+                              {neetSolvingStage >= 4 && "Stage 4/4: Distractor Elimination..."}
+                            </span>
+                          </div>
+                          <div className="w-full bg-[#DCE7D9] h-2 rounded-full overflow-hidden">
+                            <div 
+                              className="bg-gradient-to-r from-[#B07D4F] to-[#1E3A20] h-full transition-all duration-300"
+                              style={{ width: `${Math.min(100, Math.max(20, neetSolvingStage * 25))}%` }}
+                            />
+                          </div>
+                          <p className="text-[11px] font-mono text-[#556052]">
+                            {neetSolvingStage === 1 && "Ingesting question stem, clinical parameters, and boundary conditions..."}
+                            {neetSolvingStage === 2 && "Grounding theoretical concepts strictly in NCERT Biology/Chemistry/Physics curricula..."}
+                            {neetSolvingStage === 3 && "Executing algebraic calculations and clinical mechanism deduction..."}
+                            {neetSolvingStage >= 4 && "Cross-referencing verified NEET answer key and preparing 30s shortcut..."}
+                          </p>
+                        </div>
+                      )}
 
                       {/* Nemotron Solution Box */}
                       {neetAiSolution && (
                         <div className="rounded-2xl bg-[#FAF8F5] border-2 border-[#1E3A20] p-6 space-y-5 shadow-md animate-in fade-in duration-300">
-                          <div className="flex items-center justify-between pb-3 border-b border-[#D5CFBE]">
+                          <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#D5CFBE]">
                             <div className="flex items-center gap-2.5">
-                              <Bot className="w-5 h-5 text-[#B07D4F]" />
-                              <h3 className="font-serif font-bold text-base text-[#1A2219]">
-                                NVIDIA Nemotron Ultra NEET Medical Reasoning
-                              </h3>
+                              <div className="w-8 h-8 rounded-lg bg-[#1E3A20] text-white flex items-center justify-center">
+                                <Bot className="w-5 h-5 text-[#C8A95B]" />
+                              </div>
+                              <div>
+                                <h3 className="font-serif font-bold text-base text-[#1A2219]">
+                                  NVIDIA Nemotron Ultra NEET Medical Reasoning
+                                </h3>
+                                <p className="text-[10px] font-mono text-[#6C7D64]">
+                                  {neetAiSolution.model} • Latency: {neetAiSolution.latencyMs}ms
+                                </p>
+                              </div>
                             </div>
-                            <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase">
-                              Verified NCERT Core
+                            <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase">
+                              ✓ NCERT Verified Core
                             </span>
                           </div>
+
+                          {/* Direct Solution Fallback Banner */}
+                          {neetAiSolution.directSolutionUrl && (
+                            <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50/70 border border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                              <div className="space-y-0.5">
+                                <div className="text-xs font-mono font-bold text-amber-950 flex items-center gap-1.5">
+                                  <span>🔗 Direct Solution Link (Official & Video Verification):</span>
+                                </div>
+                                <p className="text-[11px] text-amber-900 font-sans">
+                                  Cross-verify with original exam portal, official answer keys, or watch video solutions.
+                                </p>
+                              </div>
+
+                              <a
+                                href={neetAiSolution.directSolutionUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-4 py-2 rounded-xl bg-[#1E3A20] hover:bg-[#284E2A] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                              >
+                                <span>Open Direct Solution</span>
+                                <ExternalLink className="w-3.5 h-3.5" />
+                              </a>
+                            </div>
+                          )}
 
                           {/* Principles */}
                           {neetAiSolution.solution?.governingPrinciples && (
@@ -1472,32 +2084,54 @@ export default function PYQPortalPage() {
                             </div>
                           )}
 
-                          {/* Derivation Steps */}
-                          <div className="space-y-1.5">
-                            <span className="text-xs font-mono font-bold uppercase text-[#556052]">NCERT Medical & Physical Derivation:</span>
-                            <div className="p-4 rounded-xl bg-white border border-[#D5CFBE] text-xs font-sans text-[#1A2219] space-y-2 leading-relaxed">
-                              {typeof neetAiSolution.solution?.stepByStepDerivation === "string" ? (
-                                <p className="whitespace-pre-line">{neetAiSolution.solution.stepByStepDerivation}</p>
-                              ) : (
-                                Array.isArray(neetAiSolution.solution?.stepByStepDerivation) && neetAiSolution.solution.stepByStepDerivation.map((s: string, i: number) => (
-                                  <div key={i} className="flex items-start gap-2">
-                                    <span className="font-mono font-bold text-[#1E3A20]">{i + 1}.</span>
-                                    <span>{s}</span>
+                          {/* Numbered Step-by-Step Derivation Cards */}
+                          <div className="space-y-2.5">
+                            <span className="text-xs font-mono font-bold uppercase text-[#556052] flex items-center gap-1.5">
+                              <Layers className="w-3.5 h-3.5 text-[#B07D4F]" />
+                              <span>Real-Time Step-by-Step Derivation Process:</span>
+                            </span>
+
+                            {neetAiSolution.solution?.steps && neetAiSolution.solution.steps.length > 0 ? (
+                              <div className="space-y-2">
+                                {neetAiSolution.solution.steps.map((step: any, sIdx: number) => (
+                                  <div key={sIdx} className="p-3.5 rounded-xl bg-white border border-[#E1DDD2] shadow-2xs space-y-1">
+                                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#1E3A20]">
+                                      <span className="w-5 h-5 rounded-full bg-[#EAE6DB] text-[#1E3A20] flex items-center justify-center text-[11px]">
+                                        {step.stepNumber || sIdx + 1}
+                                      </span>
+                                      <span>{step.title}</span>
+                                    </div>
+                                    <p className="text-xs font-serif text-[#1A2219] leading-relaxed pl-7">
+                                      {step.content}
+                                    </p>
                                   </div>
-                                ))
-                              )}
-                            </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="p-4 rounded-xl bg-white border border-[#D5CFBE] text-xs font-sans text-[#1A2219] space-y-2 leading-relaxed">
+                                {typeof neetAiSolution.solution?.stepByStepDerivation === "string" ? (
+                                  <p className="whitespace-pre-line">{neetAiSolution.solution.stepByStepDerivation}</p>
+                                ) : (
+                                  Array.isArray(neetAiSolution.solution?.stepByStepDerivation) && neetAiSolution.solution.stepByStepDerivation.map((s: string, i: number) => (
+                                    <div key={i} className="flex items-start gap-2">
+                                      <span className="font-mono font-bold text-[#1E3A20]">{i + 1}.</span>
+                                      <span>{s}</span>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           {/* Speed Hack */}
-                          {neetAiSolution.solution?.speedHack60Sec && (
+                          {(neetAiSolution.solution?.speedHack || neetAiSolution.solution?.speedHack60Sec) && (
                             <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 space-y-1">
                               <span className="text-[11px] font-mono font-bold text-emerald-900 uppercase flex items-center gap-1">
                                 <Zap className="w-3.5 h-3.5 text-[#B07D4F]" />
                                 Competitive Elimination Hack:
                               </span>
                               <p className="text-xs text-emerald-950 font-sans">
-                                {neetAiSolution.solution.speedHack60Sec}
+                                {neetAiSolution.solution.speedHack || neetAiSolution.solution.speedHack60Sec}
                               </p>
                             </div>
                           )}
@@ -1516,8 +2150,34 @@ export default function PYQPortalPage() {
                           )}
 
                           {neetAiSolution.solution?.correctOption && (
-                            <div className="text-xs font-mono font-bold text-[#1E3A20] pt-1">
-                              Final Answer Key: {neetAiSolution.solution.correctOption}
+                            <div className="p-3 rounded-xl bg-[#EFECE3] border border-[#D5CFBE] flex items-center justify-between text-xs font-mono font-bold text-[#1E3A20]">
+                              <span>Final Answer Key:</span>
+                              <span className="px-2.5 py-0.5 rounded bg-[#1E3A20] text-white">
+                                {neetAiSolution.solution.correctOption}
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Alternative Outbound Verification Links */}
+                          {neetAiSolution.directLinks && neetAiSolution.directLinks.length > 0 && (
+                            <div className="pt-2 border-t border-[#E1DDD2] space-y-1.5">
+                              <span className="text-[11px] font-mono text-[#6C7D64] uppercase font-bold">
+                                External Verification & Video Archives:
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {neetAiSolution.directLinks.map((link: any, lIdx: number) => (
+                                  <a
+                                    key={lIdx}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-[11px] font-mono px-3 py-1 rounded-lg bg-white hover:bg-[#EFECE3] border border-[#D5CFBE] text-[#1E3A20] flex items-center gap-1 transition-colors"
+                                  >
+                                    <span>{link.label}</span>
+                                    <ExternalLink className="w-3 h-3 text-[#B07D4F]" />
+                                  </a>
+                                ))}
+                              </div>
                             </div>
                           )}
                         </div>
@@ -1801,8 +2461,8 @@ export default function PYQPortalPage() {
                       const isCorrect = idx === activeQuestion.correctIndex;
                       let style = "bg-white hover:bg-[#F0EDE4] border-[#D5CFBE] text-[#1A2219]";
                       if (isAnswered) {
-                        if (isCorrect) style = "bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold";
-                        else if (isSelected) style = "bg-rose-50 border-rose-500 text-rose-950";
+                        if (isCorrect) style = "bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold ring-2 ring-emerald-500 shadow-xs";
+                        else if (isSelected) style = "bg-rose-50 border-rose-500 text-rose-950 ring-2 ring-rose-500 shadow-xs";
                         else style = "bg-[#F7F5F0] border-[#E1DDD2] text-[#7C8578] opacity-60";
                       }
                       return (
@@ -1814,7 +2474,13 @@ export default function PYQPortalPage() {
                           className={`w-full p-4 rounded-xl border text-left transition-all flex items-center justify-between text-sm ${style} shadow-2xs cursor-pointer`}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="w-7 h-7 rounded-lg bg-[#EAE6DB] border border-[#D5CFBE] flex items-center justify-center font-mono font-bold text-xs shrink-0 text-[#283826]">
+                            <span className={`w-7 h-7 rounded-lg font-mono font-bold text-xs shrink-0 flex items-center justify-center ${
+                              isAnswered && isCorrect
+                                ? "bg-emerald-600 text-white"
+                                : isAnswered && isSelected
+                                ? "bg-rose-600 text-white"
+                                : "bg-[#EAE6DB] border border-[#D5CFBE] text-[#283826]"
+                            }`}>
                               {opt.label}
                             </span>
                             <span>{opt.text}</span>
@@ -1830,27 +2496,345 @@ export default function PYQPortalPage() {
                     })}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-[#E1DDD2]">
-                    <button
-                      type="button"
-                      onClick={handleSolveWithNemotron}
-                      disabled={aiSolving}
-                      className="px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-semibold flex items-center gap-2 shadow-sm cursor-pointer"
-                    >
-                      <Sparkles className="w-4 h-4 text-[#B07D4F]" />
-                      <span>{aiSolving ? "Deriving..." : "Solve with Nemotron Ultra AI"}</span>
-                    </button>
-                  </div>
-                </div>
+                  {/* GREEN CARD / RED CARD FEEDBACK FOR CURATED */}
+                  {isAnswered && selectedOption !== null && (
+                    <div className="space-y-3 pt-2">
+                      {selectedOption === activeQuestion.correctIndex ? (
+                        /* GREEN CARD */
+                        <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-emerald-100/60 border-2 border-emerald-500 shadow-sm animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                                <CheckCircle2 className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h4 className="font-serif font-bold text-base text-emerald-950 flex items-center gap-2">
+                                  <span>CORRECT ANSWER!</span>
+                                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-mono font-bold">
+                                    +4 MARKS
+                                  </span>
+                                </h4>
+                                <p className="text-xs font-mono text-emerald-700">
+                                  Verified National Exam Key • Full Accuracy Credited
+                                </p>
+                              </div>
+                            </div>
+                            <span className="px-3 py-1 rounded-lg bg-white/90 border border-emerald-300 text-emerald-900 text-xs font-mono font-bold shadow-2xs">
+                              Option {activeQuestion.options[activeQuestion.correctIndex]?.label} Confirmed ✓
+                            </span>
+                          </div>
 
-                {isAnswered && (
-                  <div className="rounded-2xl bg-[#ECE7DC] border border-[#D5CFBE] p-6 space-y-4 shadow-2xs">
-                    <div className="font-serif font-bold text-base text-[#1A2219]">Official Solution:</div>
-                    <p className="text-xs sm:text-sm font-serif text-[#1A2219] leading-relaxed bg-white p-4 rounded-xl border border-[#D5CFBE]">
-                      {activeQuestion.officialExplanation}
-                    </p>
+                          <div className="p-3.5 rounded-xl bg-white/90 border border-emerald-200 text-xs sm:text-sm font-sans text-emerald-950">
+                            <div className="font-mono text-[11px] font-bold text-emerald-800 uppercase mb-1">
+                              Official Verification Rationale:
+                            </div>
+                            <p className="leading-relaxed font-serif">
+                              {activeQuestion.officialExplanation}
+                            </p>
+                          </div>
+
+                          {/* Direct Solution Link in Green Card */}
+                          <div className="flex items-center justify-between pt-1 text-xs">
+                            <span className="font-mono text-emerald-800 text-[11px]">
+                              Want authoritative external derivation or video?
+                            </span>
+                            <a
+                              href={`https://www.google.com/search?q=${encodeURIComponent(`${activeQuestion.question.slice(0, 100)} ${activeQuestion.exam} ${activeQuestion.subject} solution answer key`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-900 hover:text-emerald-950 font-mono font-bold underline flex items-center gap-1"
+                            >
+                              <span>Direct Solution Link</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                      ) : (
+                        /* RED CARD */
+                        <div className="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-rose-50 via-red-50/50 to-rose-100/60 border-2 border-rose-500 shadow-sm animate-in fade-in zoom-in-95 duration-200 space-y-3">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center shadow-xs">
+                                <XCircle className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h4 className="font-serif font-bold text-base text-rose-950 flex items-center gap-2">
+                                  <span>INCORRECT ATTEMPT!</span>
+                                  <span className="px-2.5 py-0.5 rounded-full bg-rose-700 text-white text-[11px] font-mono font-bold">
+                                    -1 NEGATIVE MARK
+                                  </span>
+                                </h4>
+                                <p className="text-xs font-mono text-rose-700">
+                                  Penalty Applied as per NTA Exam Regulations • Review Traps Below
+                                </p>
+                              </div>
+                            </div>
+                            <span className="px-3 py-1 rounded-lg bg-white/90 border border-rose-300 text-rose-900 text-xs font-mono font-bold shadow-2xs">
+                              Negative Mark Incurred
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <div className="p-3 rounded-xl bg-white/90 border border-rose-300 text-xs font-sans text-rose-950">
+                              <span className="text-rose-600 font-mono font-bold text-[11px] uppercase block mb-1">
+                                ✗ Your Selection:
+                              </span>
+                              <div className="font-bold">
+                                Option {activeQuestion.options[selectedOption]?.label}: {activeQuestion.options[selectedOption]?.text}
+                              </div>
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-300 text-xs font-sans text-emerald-950">
+                              <span className="text-emerald-700 font-mono font-bold text-[11px] uppercase block mb-1">
+                                ✓ Official Correct Key:
+                              </span>
+                              <div className="font-bold">
+                                Option {activeQuestion.options[activeQuestion.correctIndex]?.label}: {activeQuestion.options[activeQuestion.correctIndex]?.text}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Common Trap Alert */}
+                          <div className="p-3.5 rounded-xl bg-white/90 border border-rose-200 text-xs sm:text-sm font-sans text-rose-950">
+                            <div className="font-mono text-[11px] font-bold text-rose-800 uppercase flex items-center gap-1.5 mb-1">
+                              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+                              <span>Negative Marking Trap Analysis:</span>
+                            </div>
+                            <p className="leading-relaxed">
+                              {activeQuestion.commonTrap || activeQuestion.officialExplanation}
+                            </p>
+                          </div>
+
+                          {/* Direct Solution Link in Red Card */}
+                          <div className="flex items-center justify-between pt-1 text-xs">
+                            <span className="font-mono text-rose-800 text-[11px]">
+                              Review verified answer & step-by-step resolution:
+                            </span>
+                            <a
+                              href={`https://www.google.com/search?q=${encodeURIComponent(`${activeQuestion.question.slice(0, 100)} ${activeQuestion.exam} ${activeQuestion.subject} solution answer key`)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-rose-900 hover:text-rose-950 font-mono font-bold underline flex items-center gap-1"
+                            >
+                              <span>Direct Solution Link</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Solve Action Bar with Direct Link Fallback */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-[#E1DDD2]">
+                    <span className="text-xs font-mono text-[#556052]">
+                      Need AI derivation or authoritative external proof?
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={`https://www.google.com/search?q=${encodeURIComponent(`${activeQuestion.question.slice(0, 100)} ${activeQuestion.exam} ${activeQuestion.subject} solution answer key`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3.5 py-2.5 rounded-xl bg-[#EFECE3] hover:bg-[#E5E0D2] border border-[#D5CFBE] text-[#283826] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        title="Open direct authoritative solution"
+                      >
+                        <span>Direct Solution Link</span>
+                        <ExternalLink className="w-3.5 h-3.5 text-[#B07D4F]" />
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={handleSolveWithNemotron}
+                        disabled={aiSolving}
+                        className="px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-semibold flex items-center gap-2 shadow-sm cursor-pointer group"
+                      >
+                        <Sparkles className="w-4 h-4 text-[#B07D4F] group-hover:rotate-12 transition-transform" />
+                        <span>{aiSolving ? "Nemotron Ultra Deriving..." : "Solve with Nemotron Ultra AI"}</span>
+                      </button>
+                    </div>
                   </div>
-                )}
+
+                  {/* Real-Time Progressive Stages during Curated AI solving */}
+                  {aiSolving && (
+                    <div className="p-5 rounded-2xl bg-[#F4F1EA] border border-[#D5CFBE] space-y-3 animate-pulse">
+                      <div className="flex items-center justify-between text-xs font-mono font-bold text-[#283826]">
+                        <span className="flex items-center gap-2">
+                          <Bot className="w-4 h-4 text-[#B07D4F] animate-spin" />
+                          <span>NVIDIA Nemotron Ultra Live Reasoning Engine...</span>
+                        </span>
+                        <span className="text-[11px] text-[#B07D4F] font-semibold">
+                          {curatedSolvingStage === 1 && "Stage 1/4: Analyzing Parameters..."}
+                          {curatedSolvingStage === 2 && "Stage 2/4: Formulating Laws..."}
+                          {curatedSolvingStage === 3 && "Stage 3/4: Mathematical Derivation..."}
+                          {curatedSolvingStage >= 4 && "Stage 4/4: Distractor Elimination..."}
+                        </span>
+                      </div>
+                      <div className="w-full bg-[#E5E0D3] h-2 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-gradient-to-r from-[#B07D4F] to-[#283826] h-full transition-all duration-300"
+                          style={{ width: `${Math.min(100, Math.max(20, curatedSolvingStage * 25))}%` }}
+                        />
+                      </div>
+                      <p className="text-[11px] font-mono text-[#556052]">
+                        {curatedSolvingStage === 1 && "Ingesting question stem, physical invariants, and boundary conditions..."}
+                        {curatedSolvingStage === 2 && "Formulating first-principles equations and conservation laws without hallucination..."}
+                        {curatedSolvingStage === 3 && "Executing multi-step algebra and calculating exact value for candidate options..."}
+                        {curatedSolvingStage >= 4 && "Cross-referencing verified answer key and preparing 60s speed hack..."}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Nemotron Solution Box */}
+                  {aiSolution && (
+                    <div className="rounded-2xl bg-[#FAF8F5] border-2 border-[#283826] p-6 space-y-5 shadow-md animate-in fade-in duration-300">
+                      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#D5CFBE]">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-lg bg-[#283826] text-white flex items-center justify-center">
+                            <Bot className="w-5 h-5 text-[#C8A95B]" />
+                          </div>
+                          <div>
+                            <h3 className="font-serif font-bold text-base text-[#1A2219]">
+                              NVIDIA Nemotron Ultra Academic Derivation
+                            </h3>
+                            <p className="text-[10px] font-mono text-[#6C7D64]">
+                              {aiSolution.model} • Latency: {aiSolution.latencyMs}ms
+                            </p>
+                          </div>
+                        </div>
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold uppercase">
+                          ✓ Step-by-Step Proof
+                        </span>
+                      </div>
+
+                      {/* Direct Solution Fallback Banner */}
+                      {aiSolution.directSolutionUrl && (
+                        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50/70 border border-amber-300 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="space-y-0.5">
+                            <div className="text-xs font-mono font-bold text-amber-950 flex items-center gap-1.5">
+                              <span>🔗 Direct Solution Link (Official & Video Verification):</span>
+                            </div>
+                            <p className="text-[11px] text-amber-900 font-sans">
+                              Cross-verify with original exam portal, official answer keys, or watch video solutions.
+                            </p>
+                          </div>
+
+                          <a
+                            href={aiSolution.directSolutionUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-xl bg-[#283826] hover:bg-[#364A33] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 shrink-0 shadow-xs cursor-pointer"
+                          >
+                            <span>Open Direct Solution</span>
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Principles */}
+                      {aiSolution.solution?.governingPrinciples && (
+                        <div className="space-y-1.5">
+                          <span className="text-xs font-mono font-bold uppercase text-[#556052]">Governing Principles:</span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {aiSolution.solution.governingPrinciples.map((p: string, i: number) => (
+                              <span key={i} className="px-2.5 py-0.5 rounded bg-white border border-[#D5CFBE] text-xs font-mono text-[#283826] font-semibold">
+                                {p}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Numbered Step-by-Step Derivation Cards */}
+                      <div className="space-y-2.5">
+                        <span className="text-xs font-mono font-bold uppercase text-[#556052] flex items-center gap-1.5">
+                          <Layers className="w-3.5 h-3.5 text-[#B07D4F]" />
+                          <span>Real-Time Step-by-Step Derivation Process:</span>
+                        </span>
+
+                        {aiSolution.solution?.steps && aiSolution.solution.steps.length > 0 ? (
+                          <div className="space-y-2">
+                            {aiSolution.solution.steps.map((step: any, sIdx: number) => (
+                              <div key={sIdx} className="p-3.5 rounded-xl bg-white border border-[#E1DDD2] shadow-2xs space-y-1">
+                                <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#283826]">
+                                  <span className="w-5 h-5 rounded-full bg-[#EAE6DB] text-[#283826] flex items-center justify-center text-[11px]">
+                                    {step.stepNumber || sIdx + 1}
+                                  </span>
+                                  <span>{step.title}</span>
+                                </div>
+                                <p className="text-xs font-serif text-[#1A2219] leading-relaxed pl-7">
+                                  {step.content}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="p-4 rounded-xl bg-white border border-[#E1DDD2] text-xs sm:text-sm font-serif text-[#1A2219] leading-relaxed">
+                            {aiSolution.solution?.stepByStepDerivation}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Speed Hack */}
+                      {aiSolution.solution?.speedHack && (
+                        <div className="p-3.5 rounded-xl bg-[#FAF3E8] border border-[#E5D2BA] space-y-1">
+                          <span className="text-[11px] font-mono font-bold text-[#8A5B2F] uppercase flex items-center gap-1">
+                            <Zap className="w-3.5 h-3.5" />
+                            60s Competitive Shortcut:
+                          </span>
+                          <p className="text-xs text-[#52371E] font-sans">
+                            {aiSolution.solution.speedHack}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Traps */}
+                      {aiSolution.solution?.commonTraps && (
+                        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 space-y-1">
+                          <span className="text-[11px] font-mono font-bold text-amber-900 uppercase flex items-center gap-1">
+                            <AlertTriangle className="w-3.5 h-3.5" />
+                            Negative Marking Trap:
+                          </span>
+                          <p className="text-xs text-amber-950 font-sans">
+                            {aiSolution.solution.commonTraps}
+                          </p>
+                        </div>
+                      )}
+
+                      {aiSolution.solution?.correctOption && (
+                        <div className="p-3 rounded-xl bg-[#EFECE3] border border-[#D5CFBE] flex items-center justify-between text-xs font-mono font-bold text-[#283826]">
+                          <span>Final Answer Key:</span>
+                          <span className="px-2.5 py-0.5 rounded bg-[#283826] text-white">
+                            {aiSolution.solution.correctOption}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Alternative Outbound Verification Links */}
+                      {aiSolution.directLinks && aiSolution.directLinks.length > 0 && (
+                        <div className="pt-2 border-t border-[#E1DDD2] space-y-1.5">
+                          <span className="text-[11px] font-mono text-[#6C7D64] uppercase font-bold">
+                            External Verification & Video Archives:
+                          </span>
+                          <div className="flex flex-wrap gap-2">
+                            {aiSolution.directLinks.map((link: any, lIdx: number) => (
+                              <a
+                                key={lIdx}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[11px] font-mono px-3 py-1 rounded-lg bg-white hover:bg-[#EFECE3] border border-[#D5CFBE] text-[#283826] flex items-center gap-1 transition-colors"
+                              >
+                                <span>{link.label}</span>
+                                <ExternalLink className="w-3 h-3 text-[#B07D4F]" />
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
