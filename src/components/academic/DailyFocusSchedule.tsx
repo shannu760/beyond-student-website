@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { CheckCircle2, Clock, BookOpen, ChevronRight, Calendar, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { CheckCircle2, Clock, BookOpen, ChevronRight, Calendar, AlertCircle, Tv, Sparkles } from "lucide-react";
 
 interface StudyBlock {
   id: string;
@@ -13,6 +13,8 @@ interface StudyBlock {
   status: "completed" | "in_progress" | "planned";
   priority: "High" | "Medium" | "Revision";
 }
+
+const STORAGE_KEY_TASKS = "beyond_study_schedule_blocks_v2";
 
 const INITIAL_BLOCKS: StudyBlock[] = [
   {
@@ -60,17 +62,78 @@ const INITIAL_BLOCKS: StudyBlock[] = [
 export function DailyFocusSchedule() {
   const [blocks, setBlocks] = useState<StudyBlock[]>(INITIAL_BLOCKS);
 
-  const toggleBlock = (id: string) => {
-    setBlocks((prev) =>
-      prev.map((b) => {
-        if (b.id !== id) return b;
-        if (b.status === "completed") {
-          return { ...b, status: "planned", completedMinutes: 0 };
-        } else {
-          return { ...b, status: "completed", completedMinutes: b.allocatedMinutes };
+  // Load from localStorage on mount and listen to real-time updates
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_TASKS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setBlocks((prev) =>
+            prev.map((b) => {
+              const match = parsed.find((p: any) => p.id === b.id);
+              return match ? { ...b, status: match.status } : b;
+            })
+          );
         }
-      })
-    );
+      }
+    } catch {}
+
+    const handleTaskUpdated = (e: any) => {
+      const detail = e.detail;
+      if (!detail) return;
+      setBlocks((prev) =>
+        prev.map((b) => {
+          if (b.id !== detail.taskId) return b;
+          const isDone = detail.status === "completed";
+          return {
+            ...b,
+            status: detail.status,
+            completedMinutes: isDone ? b.allocatedMinutes : 0,
+          };
+        })
+      );
+    };
+
+    window.addEventListener("beyond:task-updated", handleTaskUpdated);
+    return () => {
+      window.removeEventListener("beyond:task-updated", handleTaskUpdated);
+    };
+  }, []);
+
+  const toggleBlock = (id: string) => {
+    setBlocks((prev) => {
+      const target = prev.find((b) => b.id === id);
+      const newStatus = target?.status === "completed" ? "planned" : "completed";
+      
+      const updated = prev.map((b) => {
+        if (b.id !== id) return b;
+        return {
+          ...b,
+          status: newStatus as any,
+          completedMinutes: newStatus === "completed" ? b.allocatedMinutes : 0,
+        };
+      });
+
+      try {
+        localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(updated));
+      } catch {}
+
+      if (target) {
+        window.dispatchEvent(
+          new CustomEvent("beyond:task-updated", {
+            detail: {
+              taskId: id,
+              topic: target.topic,
+              status: newStatus,
+              subject: target.subject,
+            },
+          })
+        );
+      }
+
+      return updated;
+    });
   };
 
   const totalAllocated = blocks.reduce((acc, b) => acc + b.allocatedMinutes, 0);
@@ -158,6 +221,14 @@ export function DailyFocusSchedule() {
                     <div className={`text-sm font-serif font-bold text-[#1A2219] ${isDone ? "line-through opacity-70" : ""}`}>
                       {block.topic}
                     </div>
+                    <a
+                      href="#videos"
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1 text-[10px] font-mono text-[#B07D4F] hover:text-[#283826] mt-0.5 hover:underline"
+                    >
+                      <Tv className="w-2.5 h-2.5" />
+                      <span>Watch AI Video</span>
+                    </a>
                   </div>
 
                   {/* Subtopics */}

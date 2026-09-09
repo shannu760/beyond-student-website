@@ -15,37 +15,55 @@ import {
   ThumbsUp
 } from "lucide-react";
 import { VIDEO_CURRICULUM, VideoCurriculumItem } from "@/data/videoCurriculum";
+import { useAIVideoRecommendations } from "@/hooks/useAIVideoRecommendations";
 
 export function AIVideoRecommendationPopup() {
+  const { topRecommendation, recommendations, lastEventMessage, completedCount } = useAIVideoRecommendations();
   const [showToast, setShowToast] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [recommendedVideo, setRecommendedVideo] = useState<VideoCurriculumItem>(VIDEO_CURRICULUM[0]);
+  const [recommendedVideo, setRecommendedVideo] = useState<VideoCurriculumItem>(
+    topRecommendation || VIDEO_CURRICULUM[0]
+  );
   const [aiRationale, setAiRationale] = useState<string>(
-    "Based on your recent practice in Mechanics & Work-Energy Theorem, this concept-heavy lecture by ABJ Sir will solidify your foundation before tomorrow's revision."
+    topRecommendation?.aiRationale ||
+      "Based on your recent practice in Mechanics & Work-Energy Theorem, this concept-heavy lecture by ABJ Sir will solidify your foundation before tomorrow's revision."
   );
   const [userQuery, setUserQuery] = useState("");
   const [searchMatches, setSearchMatches] = useState<VideoCurriculumItem[]>([]);
   const [searching, setSearching] = useState(false);
 
-  // Automatically trigger intelligent recommendation popup after 5 seconds
+  // Sync with real-time engine when topRecommendation updates
+  useEffect(() => {
+    if (topRecommendation) {
+      setRecommendedVideo(topRecommendation);
+      if (topRecommendation.aiRationale) {
+        setAiRationale(topRecommendation.aiRationale);
+      }
+    }
+  }, [topRecommendation]);
+
+  // Trigger popup after 4 seconds initially or when tasks are updated
   useEffect(() => {
     const timer = setTimeout(() => {
-      // Pick appropriate video based on student's current target
-      const match = VIDEO_CURRICULUM.find((v) => v.level === "Basic Foundation" && v.exam === "JEE") || VIDEO_CURRICULUM[0];
-      setRecommendedVideo(match);
       setShowToast(true);
-    }, 5000);
+    }, 4000);
 
     const handleOpenRecommender = () => {
       setModalOpen(true);
       setShowToast(false);
     };
 
+    const handleTaskUpdated = () => {
+      setShowToast(true);
+    };
+
     window.addEventListener("beyond:open-ai-video-recommender", handleOpenRecommender);
+    window.addEventListener("beyond:task-updated", handleTaskUpdated);
 
     return () => {
       clearTimeout(timer);
       window.removeEventListener("beyond:open-ai-video-recommender", handleOpenRecommender);
+      window.removeEventListener("beyond:task-updated", handleTaskUpdated);
     };
   }, []);
 
@@ -75,7 +93,7 @@ export function AIVideoRecommendationPopup() {
     <>
       {/* Floating Bottom-Left Smart In-App Notification Toast */}
       {showToast && !modalOpen && (
-        <div className="fixed bottom-6 left-6 z-50 max-w-sm w-full bg-[#F7F5F0] paper-texture rounded-xl border-2 border-[#283826] p-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-300">
+        <div className="fixed bottom-6 left-6 z-50 max-w-sm w-full bg-[#FAF8F5] rounded-xl border-2 border-[#283826] p-4 shadow-2xl animate-in slide-in-from-bottom-5 duration-300">
           <div className="flex items-start justify-between gap-2 pb-2 border-b border-[#E1DDD2]">
             <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-[#283826]">
               <Sparkles className="w-3.5 h-3.5 text-[#B07D4F]" />
@@ -138,7 +156,7 @@ export function AIVideoRecommendationPopup() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1A2219]/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div 
-            className="w-full max-w-2xl bg-[#F7F5F0] paper-texture rounded-xl border border-[#D5CFBE] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+            className="w-full max-w-2xl bg-[#FAF8F5] rounded-xl border border-[#D5CFBE] shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -227,10 +245,10 @@ export function AIVideoRecommendationPopup() {
               {/* Matched Results List */}
               <div className="space-y-3 pt-2">
                 <span className="text-xs font-mono font-bold uppercase text-[#556052] block">
-                  Top Recommended Video Lectures ({searchMatches.length > 0 ? searchMatches.length : VIDEO_CURRICULUM.slice(0, 3).length}):
+                  Top Recommended Video Lectures ({searchMatches.length > 0 ? searchMatches.length : recommendations.length}):
                 </span>
 
-                {(searchMatches.length > 0 ? searchMatches : VIDEO_CURRICULUM.slice(0, 3)).map((vid) => (
+                {(searchMatches.length > 0 ? searchMatches : recommendations).map((vid) => (
                   <div
                     key={vid.id}
                     className="p-4 rounded-xl bg-white border border-[#D5CFBE] hover:border-[#283826] transition-all shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"

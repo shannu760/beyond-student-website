@@ -17,6 +17,7 @@ import {
   GraduationCap
 } from "lucide-react";
 import { VIDEO_CURRICULUM, VideoCurriculumItem } from "@/data/videoCurriculum";
+import { AIVideoRecommendationDeck } from "@/components/academic/AIVideoRecommendationDeck";
 
 export function CuratedVideosSection() {
   const [selectedLanguage, setSelectedLanguage] = useState<"ALL" | "English" | "Hindi" | "Telugu">("ALL");
@@ -73,7 +74,21 @@ export function CuratedVideosSection() {
           </button>
         </div>
 
-        {/* Filter Toolbar */}
+        {/* Real-Time AI Adaptive Video Deck */}
+        <AIVideoRecommendationDeck onSelectChapterFilter={(chapter) => setSearchQuery(chapter)} />
+
+        {/* Full Curriculum Filter Toolbar */}
+        <div className="pt-4">
+          <div className="flex items-center justify-between pb-3">
+            <h3 className="font-serif font-bold text-xl text-[#1A2219]">
+              Full Multilingual Curriculum Archive
+            </h3>
+            <span className="text-xs font-mono text-[#6C7D64]">
+              {filteredVideos.length} lectures available
+            </span>
+          </div>
+        </div>
+
         <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#D5CFBE] space-y-4">
           
           {/* Top Row: Exam Selector & Search */}

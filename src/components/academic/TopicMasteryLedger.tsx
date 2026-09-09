@@ -135,8 +135,26 @@ export function TopicMasteryLedger() {
                 </div>
 
                 {/* Recommended Action */}
-                <div className="sm:col-span-2 text-left sm:text-right text-xs font-mono text-[#283826] font-semibold">
-                  {item.actionRecommended}
+                <div className="sm:col-span-2 text-left sm:text-right text-xs font-mono">
+                  <a
+                    href="#videos"
+                    onClick={() => {
+                      window.dispatchEvent(
+                        new CustomEvent("beyond:task-updated", {
+                          detail: {
+                            taskId: item.id,
+                            topic: item.topic,
+                            status: item.status === "Needs Support" ? "in_progress" : "planned",
+                            subject: item.subject,
+                          },
+                        })
+                      );
+                    }}
+                    className="inline-flex items-center gap-1 text-[#283826] hover:text-[#B07D4F] font-semibold hover:underline transition-colors"
+                  >
+                    <span>{item.actionRecommended}</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </a>
                 </div>
               </div>
             ))}
