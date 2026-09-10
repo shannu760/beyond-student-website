@@ -1,6 +1,16 @@
 {
   "attempts": [
     {
+      "id": "att-1789046661874-405",
+      "studentId": "student-krishna-addanki-2026",
+      "subject": "Physics",
+      "topic": "Center of Mass",
+      "isPYQ": true,
+      "isCorrect": false,
+      "timeSpentSeconds": 45,
+      "timestamp": "2026-09-10T13:24:21.874Z"
+    },
+    {
       "id": "att-1789046340305-12",
       "studentId": "student-krishna-addanki-2026",
       "subject": "Physics",
@@ -71,6 +81,26 @@
     }
   ],
   "dailyReports": [
+    {
+      "id": "rep-2026-09-10",
+      "studentId": "student-krishna-addanki-2026",
+      "date": "2026-09-10",
+      "totalMCQs": 0,
+      "totalPYQs": 3,
+      "totalQuestions": 3,
+      "correctCount": 2,
+      "accuracyPercentage": 67,
+      "totalFocusMinutes": 0,
+      "starsEarnedToday": 45,
+      "masteredTopics": [
+        "Center of Mass"
+      ],
+      "reviewNeededTopics": [
+        "Center of Mass"
+      ],
+      "notificationRead": false,
+      "generatedAt": "2026-09-10T13:32:51.980Z"
+    },
     {
       "id": "rep-2026-09-09",
       "studentId": "student-krishna-addanki-2026",

@@ -18,13 +18,11 @@ import {
   Calendar,
   Award,
   Compass,
-  Crown,
   ShieldCheck
 } from "lucide-react";
 import { AuthModal } from "@/components/auth/AuthModal";
 import { DailyReportNotificationModal } from "@/components/academic/DailyReportNotificationModal";
 import { BeyondBrandBadge } from "@/components/brand/BeyondBrandBadge";
-import { MembershipUpgradeModal } from "@/components/academic/MembershipUpgradeModal";
 
 export function AcademicHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -33,7 +31,6 @@ export function AcademicHeader() {
   const [hasUnreadNotification, setHasUnreadNotification] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   const fetchProfileAndNotifications = async () => {
     try {
@@ -85,7 +82,6 @@ export function AcademicHeader() {
           {/* Official BEYOND Brand Badge */}
           <BeyondBrandBadge 
             size="sm" 
-            tier={currentProfile?.membershipTier} 
             href="/"
           />
 
@@ -120,10 +116,6 @@ export function AcademicHeader() {
               <span>Scholarships</span>
               <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#E8DDC8] text-[#283826]">NSP</span>
             </a>
-            <a href="#memberships" className="hover:text-[#283826] transition-colors flex items-center gap-1 text-[#283826]">
-              <Crown className="w-3.5 h-3.5 text-[#C8A95B]" />
-              <span>Membership</span>
-            </a>
             <Link href="/about" className="hover:text-[#283826] transition-colors font-medium">
               <span>About</span>
             </Link>
@@ -144,37 +136,6 @@ export function AcademicHeader() {
               <Star className="w-3.5 h-3.5 fill-[#B07D4F]" />
               <span>{starsBalance.toLocaleString()}</span>
             </a>
-
-            {/* Membership Guild Pass Badge & Trigger */}
-            <button
-              type="button"
-              onClick={() => setUpgradeModalOpen(true)}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-mono font-bold transition-all shadow-2xs cursor-pointer ${
-                currentProfile?.membershipTier === "GOLD"
-                  ? "bg-gradient-to-r from-amber-50 to-[#FAF7EE] border-[#C8A95B] text-amber-900 hover:brightness-105"
-                  : currentProfile?.membershipTier === "PREMIUM"
-                  ? "bg-emerald-50 border-emerald-400 text-emerald-800 hover:bg-emerald-100"
-                  : "bg-[#F0EDE4] border-[#D5CFBE] text-[#283826] hover:border-[#283826]"
-              }`}
-              title="BEYOND Guild Pass: Premium (₹499) / Gold (₹699)"
-            >
-              {currentProfile?.membershipTier === "GOLD" ? (
-                <>
-                  <Crown className="w-3.5 h-3.5 text-[#C8A95B] fill-[#C8A95B]" />
-                  <span>Gold Scholar</span>
-                </>
-              ) : currentProfile?.membershipTier === "PREMIUM" ? (
-                <>
-                  <Star className="w-3.5 h-3.5 text-emerald-600 fill-emerald-600" />
-                  <span>Premium</span>
-                </>
-              ) : (
-                <>
-                  <Crown className="w-3.5 h-3.5 text-[#C8A95B]" />
-                  <span>Pass: ₹499</span>
-                </>
-              )}
-            </button>
 
             {/* Notification Bell with Unread Badge */}
             <button
@@ -349,18 +310,6 @@ export function AcademicHeader() {
               <span>How BEYOND Works (4 Growth Loops)</span>
             </Link>
 
-            <button
-              type="button"
-              onClick={() => {
-                setMobileOpen(false);
-                setUpgradeModalOpen(true);
-              }}
-              className="w-full text-left text-sm font-semibold text-[#B07D4F] py-1 flex items-center gap-2"
-            >
-              <Crown className="w-4 h-4 text-[#C8A95B]" />
-              <span>BEYOND Guild Pass: Premium (₹499) / Gold (₹699)</span>
-            </button>
-
             <div className="pt-3 border-t border-[#E1DDD2] flex flex-col gap-2">
               <button
                 type="button"
@@ -414,17 +363,6 @@ export function AcademicHeader() {
         isOpen={reportModalOpen}
         onClose={() => setReportModalOpen(false)}
         onReportUpdated={() => {
-          fetchProfileAndNotifications();
-        }}
-      />
-
-      {/* Membership Upgrade Modal */}
-      <MembershipUpgradeModal
-        isOpen={upgradeModalOpen}
-        onClose={() => setUpgradeModalOpen(false)}
-        currentTier={currentProfile?.membershipTier}
-        currentStars={starsBalance}
-        onUpgraded={() => {
           fetchProfileAndNotifications();
         }}
       />

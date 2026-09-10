@@ -34,7 +34,6 @@ import {
   FileCheck,
   Check,
   X,
-  Crown,
   Camera,
   Upload,
   Loader2,
@@ -45,8 +44,6 @@ import { supabase } from "@/lib/supabase";
 import { AuthModal } from "@/components/auth/AuthModal";
 import DatabaseExtractorCard from "@/components/database/DatabaseExtractorCard";
 import { BeyondBrandBadge, MembershipTier } from "@/components/brand/BeyondBrandBadge";
-import { MembershipUpgradeModal } from "@/components/academic/MembershipUpgradeModal";
-import { MembershipPlansSection } from "@/components/academic/MembershipPlansSection";
 
 interface StudentProfile {
   id: string;
@@ -162,7 +159,7 @@ const DIGITAL_CERTIFICATES: DigitalCertificate[] = [
 export default function StudentProfilePage() {
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"stream" | "focus" | "practice" | "scholarships" | "explanations" | "membership">("stream");
+  const [activeTab, setActiveTab] = useState<"stream" | "focus" | "practice" | "scholarships" | "explanations">("stream");
   
   // Real-time activity state
   const [todayAttempts, setTodayAttempts] = useState<QuestionAttempt[]>([]);
@@ -181,7 +178,6 @@ export default function StudentProfilePage() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [editGoalModalOpen, setEditGoalModalOpen] = useState(false);
   const [selectedCert, setSelectedCert] = useState<DigitalCertificate | null>(null);
-  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
 
   // Focus Session Logger State
   const [focusDuration, setFocusDuration] = useState<number>(25);
@@ -693,22 +689,10 @@ export default function StudentProfilePage() {
                 <h1 className="font-serif font-bold text-2xl sm:text-3xl text-[#F7F5F0]">
                   {profile?.fullName || "Krishna Addanki"}
                 </h1>
-                {profile?.membershipTier === "GOLD" ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold bg-gradient-to-r from-amber-400 to-[#C8A95B] text-[#1A2219] px-2.5 py-0.5 rounded-full border border-[#C8A95B] shadow-sm">
-                    <Crown className="w-3.5 h-3.5 fill-[#1A2219]" />
-                    BEYOND Gold Scholar
-                  </span>
-                ) : profile?.membershipTier === "PREMIUM" ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full border border-emerald-400 shadow-sm">
-                    <Star className="w-3.5 h-3.5 fill-white" />
-                    BEYOND Premium
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-mono font-bold bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/40">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    Verified Student
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-mono font-bold bg-emerald-900/60 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/40 shadow-xs">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  Verified Student Scholar
+                </span>
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-[#F0EDE4]/80 font-mono">
@@ -789,26 +773,6 @@ export default function StudentProfilePage() {
           {/* Identity Actions */}
           <div className="flex flex-wrap md:flex-col items-center gap-2.5 shrink-0 w-full md:w-auto">
             <button
-              onClick={() => setUpgradeModalOpen(true)}
-              className={`flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-sm ${
-                profile?.membershipTier === "GOLD"
-                  ? "bg-gradient-to-r from-[#C8A95B] to-amber-400 text-[#1A2219] hover:brightness-105"
-                  : profile?.membershipTier === "PREMIUM"
-                  ? "bg-emerald-500 text-white hover:bg-emerald-600"
-                  : "bg-gradient-to-r from-amber-500 to-[#C8A95B] text-[#1A2219] hover:brightness-110"
-              }`}
-            >
-              <Crown className="w-4 h-4" />
-              <span>
-                {profile?.membershipTier === "GOLD"
-                  ? "Gold Pass Active"
-                  : profile?.membershipTier === "PREMIUM"
-                  ? "Upgrade to Gold (₹699)"
-                  : "Guild Pass: ₹499 / ₹699"}
-              </span>
-            </button>
-
-            <button
               onClick={() => setAuthModalOpen(true)}
               className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#F7F5F0] text-[#283826] hover:bg-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm"
             >
@@ -866,101 +830,6 @@ export default function StudentProfilePage() {
             <div className="text-[10px] uppercase font-mono text-[#F0EDE4]/70 font-bold tracking-wider">
               Feynman Explanations
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Official BEYOND Brand & Guild Pass Section */}
-      <div id="membership" className="rounded-3xl border border-[#D5CFBE] bg-white p-6 sm:p-7 shadow-md space-y-5">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-[#F0EDE4]">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-[#283826] bg-[#283826] shrink-0 shadow-sm">
-              <Image
-                src="/images/profile-logo.png"
-                alt="BEYOND"
-                width={48}
-                height={48}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-serif font-bold text-xl text-[#1A2219]">
-                  BEYOND Student Guild Membership
-                </span>
-                <span
-                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase ${
-                    profile?.membershipTier === "GOLD"
-                      ? "bg-gradient-to-r from-amber-400 to-[#C8A95B] text-[#1A2219]"
-                      : profile?.membershipTier === "PREMIUM"
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
-                      : "bg-[#F0EDE4] text-[#6C7D64] border border-[#D5CFBE]"
-                  }`}
-                >
-                  {profile?.membershipTier || "FREE"} TIER
-                </span>
-              </div>
-              <p className="text-xs text-[#4F5E4B]">
-                Official institutional membership providing verified credentials, AI quota & topper mentorship.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setUpgradeModalOpen(true)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-bold tracking-wide transition-all shadow-sm cursor-pointer"
-            >
-              <Crown className="w-4 h-4 text-[#C8A95B]" />
-              <span>
-                {profile?.membershipTier === "GOLD"
-                  ? "Renew / Manage Pass"
-                  : profile?.membershipTier === "PREMIUM"
-                  ? "Upgrade to Gold (₹699)"
-                  : "Get BEYOND Pass (From ₹499)"}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Benefits Matrix Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#D5CFBE] space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-[#1A2219]">
-              <span>Tier Status</span>
-              <span className="font-mono text-[#283826]">{profile?.membershipTier || "FREE"}</span>
-            </div>
-            <p className="text-[11px] text-[#6C7D64]">
-              {profile?.membershipTier === "GOLD"
-                ? "Gold Scholar pass active for 90 days with 3x multiplier & 1-on-1 mentorship."
-                : profile?.membershipTier === "PREMIUM"
-                ? "Premium pass active with 2x star multiplier & unlimited AI derivations."
-                : "Free foundational access with standard daily question ledger."}
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#D5CFBE] space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-[#1A2219]">
-              <span>Star Multiplier</span>
-              <span className="font-mono text-amber-700 font-bold">
-                {profile?.membershipTier === "GOLD" ? "3.0x Boost" : profile?.membershipTier === "PREMIUM" ? "2.0x Boost" : "1.0x (Standard)"}
-              </span>
-            </div>
-            <p className="text-[11px] text-[#6C7D64]">
-              Earn amplified stars on every verified Feynman topic explanation and daily streak.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#FAF9F5] border border-[#D5CFBE] space-y-2">
-            <div className="flex items-center justify-between text-xs font-bold text-[#1A2219]">
-              <span>Nemotron Ultra AI</span>
-              <span className="font-mono text-emerald-700 font-bold">
-                {profile?.membershipTier === "GOLD" || profile?.membershipTier === "PREMIUM" ? "Unlimited" : "10 / Day"}
-              </span>
-            </div>
-            <p className="text-[11px] text-[#6C7D64]">
-              Step-by-step rigorous derivations across JEE Advanced, NEET, SAT & GRE questions.
-            </p>
           </div>
         </div>
       </div>
@@ -1040,18 +909,6 @@ export default function StudentProfilePage() {
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>Feynman Explanations ({explanations.length})</span>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("membership")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                activeTab === "membership"
-                  ? "bg-gradient-to-r from-amber-600 to-[#C8A95B] text-[#1A2219] shadow-xs"
-                  : "text-amber-800 hover:text-amber-900 bg-amber-50/70"
-              }`}
-            >
-              <Crown className="w-3.5 h-3.5 text-[#C8A95B]" />
-              <span>Guild Pass (Plans)</span>
             </button>
           </div>
         </div>
@@ -1568,19 +1425,6 @@ export default function StudentProfilePage() {
             </div>
           </div>
         )}
-
-        {/* TAB 6: BEYOND Guild Membership Plans */}
-        {activeTab === "membership" && (
-          <div className="bg-white rounded-3xl border border-[#D5CFBE] p-3 sm:p-6 shadow-xs">
-            <MembershipPlansSection
-              currentTier={profile?.membershipTier || "FREE"}
-              currentStars={profile?.starsBalance || 0}
-              onUpgradeSuccess={async () => {
-                await loadAllStudentData();
-              }}
-            />
-          </div>
-        )}
       </div>
 
       {/* Verifiable Digital Certificates */}
@@ -1831,17 +1675,6 @@ export default function StudentProfilePage() {
           </div>
         </div>
       )}
-
-      {/* Membership Upgrade Modal */}
-      <MembershipUpgradeModal
-        isOpen={upgradeModalOpen}
-        onClose={() => setUpgradeModalOpen(false)}
-        currentTier={profile?.membershipTier || "FREE"}
-        currentStars={profile?.starsBalance || 0}
-        onUpgraded={async () => {
-          await loadAllStudentData();
-        }}
-      />
     </div>
   );
 }

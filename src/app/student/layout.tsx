@@ -20,8 +20,7 @@ import {
   Rocket,
   PiggyBank,
   Code2,
-  FileText,
-  Crown
+  FileText
 } from "lucide-react";
 import { BeyondBrandBadge } from "@/components/brand/BeyondBrandBadge";
 
@@ -100,7 +99,6 @@ export default function StudentLayout({
 
           <BeyondBrandBadge
             size="sm"
-            tier={profile?.membershipTier}
             href="/student/dashboard"
             variant="dark"
           />
@@ -114,36 +112,6 @@ export default function StudentLayout({
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Monograph Home</span>
-          </Link>
-
-          {/* Membership Tier Indicator */}
-          <Link
-            href="/student/profile#membership"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded text-xs font-mono font-bold transition-all border shadow-xs ${
-              profile?.membershipTier === "GOLD"
-                ? "bg-gradient-to-r from-[#3D331A] to-[#283826] border-[#C8A95B] text-amber-300 hover:brightness-110"
-                : profile?.membershipTier === "PREMIUM"
-                ? "bg-emerald-950/70 border-emerald-500/60 text-emerald-300 hover:bg-emerald-900/50"
-                : "bg-[#364A33] border-[#6C7D64]/40 text-[#F0EDE4] hover:bg-[#435B40]"
-            }`}
-            title="BEYOND Guild Pass (Premium ₹499 / Gold ₹699)"
-          >
-            {profile?.membershipTier === "GOLD" ? (
-              <>
-                <Crown className="w-3.5 h-3.5 text-[#C8A95B] fill-[#C8A95B]" />
-                <span className="hidden sm:inline">Gold Scholar</span>
-              </>
-            ) : profile?.membershipTier === "PREMIUM" ? (
-              <>
-                <Star className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
-                <span className="hidden sm:inline">Premium</span>
-              </>
-            ) : (
-              <>
-                <Crown className="w-3.5 h-3.5 text-[#C8A95B]" />
-                <span className="hidden sm:inline">Pass: ₹499</span>
-              </>
-            )}
           </Link>
 
           {/* Streaks Pill */}

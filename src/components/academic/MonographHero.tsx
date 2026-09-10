@@ -63,7 +63,7 @@ export function MonographHero() {
               />
               <span>Welcome back, <strong className="text-[#C8A95B] font-bold">{firstName}</strong></span>
               <span className="text-[10px] text-[#D5CFBE] font-sans">
-                ({profile?.membershipTier === "GOLD" ? "Gold Scholar" : "Active"})
+                (Scholar)
               </span>
               <ArrowRight className="w-3 h-3 text-[#C8A95B] group-hover:translate-x-0.5 transition-transform" />
             </Link>

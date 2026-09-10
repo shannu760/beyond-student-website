@@ -11,7 +11,6 @@ import { TopicExplanationUpload } from "@/components/academic/TopicExplanationUp
 import { StudentAmenitiesSection } from "@/components/academic/StudentAmenitiesSection";
 import { DiagnosticPathwaySimulator } from "@/components/academic/DiagnosticPathwaySimulator";
 import { ScholarshipOpportunityRadar } from "@/components/academic/ScholarshipOpportunityRadar";
-import { MembershipPlansSection } from "@/components/academic/MembershipPlansSection";
 import { AIVideoRecommendationPopup } from "@/components/academic/AIVideoRecommendationPopup";
 import { AcademicFooter } from "@/components/academic/AcademicFooter";
 
@@ -73,11 +72,6 @@ export default function Home() {
         {/* Official Scholarships Radar */}
         <div className="scroll-reveal">
           <ScholarshipOpportunityRadar />
-        </div>
-
-        {/* Official BEYOND Guild Membership Plans (Premium ₹499 / Gold ₹699 for 3 months) */}
-        <div id="memberships" className="scroll-reveal">
-          <MembershipPlansSection />
         </div>
       </main>
 
