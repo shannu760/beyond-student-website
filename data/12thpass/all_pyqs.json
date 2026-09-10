@@ -869,8 +869,27 @@
       "year": 2025,
       "sessionLabel": "2025 · 3 Apr · Shift 2 · Q54",
       "type": "MCQ",
-      "question": "Consider two blocks A and B of masses m 1 ​ = 10 kg and m 2 ​ = 5 kg that are placed on a frictionless table. The block A moves with a constant speed v = 3 m / s towards the block B kept at rest.…",
-      "sourceUrl": "https://12thpass.ai/pyq/jee-main/physics/center-of-mass/2025-03-apr-shift-2-q54"
+      "question": "Consider two blocks A and B of masses m 1 ​ = 10 kg and m 2 ​ = 5 kg that are placed on a frictionless table. The block A moves with a constant speed v = 3 m / s towards the block B kept at rest. A spring of spring constant k = 3000 N / m is attached to block B. The maximum compression of the spring during the collision is:",
+      "sourceUrl": "https://12thpass.ai/pyq/jee-main/physics/center-of-mass/2025-03-apr-shift-2-q54",
+      "options": [
+        {
+          "label": "A",
+          "text": "0.3 m"
+        },
+        {
+          "label": "B",
+          "text": "0.1 m"
+        },
+        {
+          "label": "C",
+          "text": "0.4 m"
+        },
+        {
+          "label": "D",
+          "text": "0.2 m"
+        }
+      ],
+      "correctIndex": 1
     },
     {
       "id": "jee-main-physics-2025-07-apr-shift-1-q54",
