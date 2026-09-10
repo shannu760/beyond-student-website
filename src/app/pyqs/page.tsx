@@ -792,7 +792,10 @@ export default function PYQPortalPage() {
                           type="button"
                           onClick={() => {
                             setPassSelectedQuestion(q);
+                            setPassSelectedOption(null);
+                            setPassIsAnswered(false);
                             setPassAiSolution(null);
+                            setPassSolvingStage(0);
                           }}
                           className={`w-full p-3.5 rounded-xl border text-left transition-all flex flex-col gap-1.5 cursor-pointer ${
                             isActive
@@ -1090,14 +1093,23 @@ export default function PYQPortalPage() {
                       </div>
                     )}
 
-                    {/* Solve Action Bar with Direct Link Fallback */}
+                    {/* Solve Action Bar with Direct Link Fallback (Gated until user attempts question) */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-[#E1DDD2]">
-                      <span className="text-xs font-mono text-[#556052]">
-                        Need deep mathematical proof or step-by-step derivation?
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {passSelectedOption === null ? (
+                          <span className="text-xs font-mono text-[#7C8578] flex items-center gap-1.5 font-medium">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                            <span>Select your answer above first to unlock AI step-by-step derivation</span>
+                          </span>
+                        ) : (
+                          <span className="text-xs font-mono text-[#556052]">
+                            Need deep mathematical proof or step-by-step derivation?
+                          </span>
+                        )}
+                      </div>
 
                       <div className="flex items-center gap-2">
-                        {passSelectedQuestion.directSolutionUrl && (
+                        {passSelectedOption !== null && passSelectedQuestion.directSolutionUrl && (
                           <a
                             href={passSelectedQuestion.directSolutionUrl}
                             target="_blank"
@@ -1112,12 +1124,28 @@ export default function PYQPortalPage() {
 
                         <button
                           type="button"
-                          onClick={handleSolvePassQuestion}
+                          onClick={() => {
+                            if (passSelectedOption === null) {
+                              alert("Please choose an answer (A, B, C, or D) first to test your understanding!");
+                              return;
+                            }
+                            handleSolvePassQuestion();
+                          }}
                           disabled={passAiSolving}
-                          className="px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group"
+                          className={`px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group ${
+                            passSelectedOption === null
+                              ? "bg-[#EAE6DB] border border-[#D5CFBE] text-[#6C7D64] hover:bg-[#E1DDD2]"
+                              : "bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0]"
+                          }`}
                         >
-                          <Sparkles className="w-4 h-4 text-[#B07D4F] group-hover:rotate-12 transition-transform" />
-                          <span>{passAiSolving ? "Nemotron Ultra Deriving..." : "Solve with Nemotron Ultra AI"}</span>
+                          <Sparkles className={`w-4 h-4 transition-transform ${passSelectedOption !== null ? "text-[#B07D4F] group-hover:rotate-12" : "text-[#8C9886]"}`} />
+                          <span>
+                            {passAiSolving 
+                              ? "Nemotron Ultra Deriving..." 
+                              : passSelectedOption === null 
+                              ? "Answer above first" 
+                              : "Solve with Nemotron Ultra AI"}
+                          </span>
                         </button>
                       </div>
                     </div>
@@ -1921,26 +1949,33 @@ export default function PYQPortalPage() {
                         </div>
                       )}
 
-                      {/* Official Explanation Toggle & Speed Hacks */}
+                      {/* Official Explanation Toggle & Speed Hacks (Gated until user answers) */}
                       <div className="space-y-3 pt-2">
                         <div className="flex items-center justify-between">
-                          <button
-                            type="button"
-                            onClick={() => setNeetShowExplanation(!neetShowExplanation)}
-                            className="text-xs font-mono font-bold text-[#1E3A20] hover:underline flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <span>{neetShowExplanation ? "Hide Official Explanation" : "View Official Step-by-Step Explanation"}</span>
-                            <span>{neetShowExplanation ? "▲" : "▼"}</span>
-                          </button>
+                          {neetSelectedOption !== null ? (
+                            <button
+                              type="button"
+                              onClick={() => setNeetShowExplanation(!neetShowExplanation)}
+                              className="text-xs font-mono font-bold text-[#1E3A20] hover:underline flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <span>{neetShowExplanation ? "Hide Official Explanation" : "View Official Step-by-Step Explanation"}</span>
+                              <span>{neetShowExplanation ? "▲" : "▼"}</span>
+                            </button>
+                          ) : (
+                            <span className="text-xs font-mono text-[#7C8578] flex items-center gap-1.5 font-medium">
+                              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-ping" />
+                              <span>Select an option above to test your knowledge & unlock explanation</span>
+                            </span>
+                          )}
 
-                          {neetSelectedQuestion.speedHack && (
+                          {neetSelectedQuestion.speedHack && neetSelectedOption !== null && (
                             <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">
                               ⚡ 30s Speed Hack
                             </span>
                           )}
                         </div>
 
-                        {neetShowExplanation && (
+                        {neetSelectedOption !== null && neetShowExplanation && (
                           <div className="p-4 rounded-2xl bg-[#F4F8F3] border border-[#C5D6C2] space-y-3 text-xs font-sans text-[#142616] animate-in fade-in duration-200">
                             <div>
                               <strong className="font-mono text-[11px] uppercase text-[#1E3A20] block mb-1">Official Solution:</strong>
@@ -1962,14 +1997,16 @@ export default function PYQPortalPage() {
                         )}
                       </div>
 
-                      {/* AI Derivation Action Button with Direct Link Fallback */}
+                      {/* AI Derivation Action Button with Direct Link Fallback (Gated until user attempts question) */}
                       <div className="pt-2 border-t border-[#E1DDD2] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <span className="text-xs font-mono text-[#556052]">
-                          Need deep clinical and conceptual proof?
+                          {neetSelectedOption === null 
+                            ? "Attempt the question first to unlock AI clinical proof" 
+                            : "Need deep clinical and conceptual proof?"}
                         </span>
 
                         <div className="flex items-center gap-2">
-                          {(neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url) && (
+                          {neetSelectedOption !== null && (neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url) && (
                             <a
                               href={neetSelectedQuestion.downloadUrl || neetSelectedQuestion.url}
                               target="_blank"
@@ -1984,12 +2021,28 @@ export default function PYQPortalPage() {
 
                           <button
                             type="button"
-                            onClick={handleSolveNeetQuestion}
+                            onClick={() => {
+                              if (neetSelectedOption === null) {
+                                alert("Please choose an answer (A, B, C, or D) first to test yourself!");
+                                return;
+                              }
+                              handleSolveNeetQuestion();
+                            }}
                             disabled={neetAiSolving}
-                            className="px-5 py-2.5 rounded-xl bg-[#1E3A20] hover:bg-[#284E2A] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group"
+                            className={`px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer group ${
+                              neetSelectedOption === null
+                                ? "bg-[#EAE6DB] border border-[#D5CFBE] text-[#6C7D64] hover:bg-[#E1DDD2]"
+                                : "bg-[#1E3A20] hover:bg-[#284E2A] text-white"
+                            }`}
                           >
-                            <Sparkles className="w-4 h-4 text-[#C8A95B] group-hover:rotate-12 transition-transform" />
-                            <span>{neetAiSolving ? "Nemotron Ultra Reasoning..." : "Derive with Nemotron Ultra AI"}</span>
+                            <Sparkles className={`w-4 h-4 transition-transform ${neetSelectedOption !== null ? "text-[#C8A95B] group-hover:rotate-12" : "text-[#8C9886]"}`} />
+                            <span>
+                              {neetAiSolving 
+                                ? "Nemotron Ultra Reasoning..." 
+                                : neetSelectedOption === null 
+                                ? "Answer above first" 
+                                : "Derive with Nemotron Ultra AI"}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -2625,32 +2678,52 @@ export default function PYQPortalPage() {
                     </div>
                   )}
 
-                  {/* Solve Action Bar with Direct Link Fallback */}
+                  {/* Solve Action Bar with Direct Link Fallback (Gated until user attempts question) */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-[#E1DDD2]">
                     <span className="text-xs font-mono text-[#556052]">
-                      Need AI derivation or authoritative external proof?
+                      {!isAnswered 
+                        ? "Choose an answer above to test yourself & unlock AI derivation" 
+                        : "Need AI derivation or authoritative external proof?"}
                     </span>
 
                     <div className="flex items-center gap-2">
-                      <a
-                        href={`https://www.google.com/search?q=${encodeURIComponent(`${activeQuestion.question.slice(0, 100)} ${activeQuestion.exam} ${activeQuestion.subject} solution answer key`)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-3.5 py-2.5 rounded-xl bg-[#EFECE3] hover:bg-[#E5E0D2] border border-[#D5CFBE] text-[#283826] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                        title="Open direct authoritative solution"
-                      >
-                        <span>Direct Solution Link</span>
-                        <ExternalLink className="w-3.5 h-3.5 text-[#B07D4F]" />
-                      </a>
+                      {isAnswered && (
+                        <a
+                          href={`https://www.google.com/search?q=${encodeURIComponent(`${activeQuestion.question.slice(0, 100)} ${activeQuestion.exam} ${activeQuestion.subject} solution answer key`)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-2.5 rounded-xl bg-[#EFECE3] hover:bg-[#E5E0D2] border border-[#D5CFBE] text-[#283826] text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                          title="Open direct authoritative solution"
+                        >
+                          <span>Direct Solution Link</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-[#B07D4F]" />
+                        </a>
+                      )}
 
                       <button
                         type="button"
-                        onClick={handleSolveWithNemotron}
+                        onClick={() => {
+                          if (!isAnswered) {
+                            alert("Please select your answer (A, B, C, or D) first to test your understanding!");
+                            return;
+                          }
+                          handleSolveWithNemotron();
+                        }}
                         disabled={aiSolving}
-                        className="px-5 py-2.5 rounded-xl bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0] text-xs font-semibold flex items-center gap-2 shadow-sm cursor-pointer group"
+                        className={`px-5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all cursor-pointer group ${
+                          !isAnswered
+                            ? "bg-[#EAE6DB] border border-[#D5CFBE] text-[#6C7D64] hover:bg-[#E1DDD2]"
+                            : "bg-[#283826] hover:bg-[#364A33] text-[#F7F5F0]"
+                        }`}
                       >
-                        <Sparkles className="w-4 h-4 text-[#B07D4F] group-hover:rotate-12 transition-transform" />
-                        <span>{aiSolving ? "Nemotron Ultra Deriving..." : "Solve with Nemotron Ultra AI"}</span>
+                        <Sparkles className={`w-4 h-4 transition-transform ${isAnswered ? "text-[#B07D4F] group-hover:rotate-12" : "text-[#8C9886]"}`} />
+                        <span>
+                          {aiSolving 
+                            ? "Nemotron Ultra Deriving..." 
+                            : !isAnswered 
+                            ? "Answer above first" 
+                            : "Solve with Nemotron Ultra AI"}
+                        </span>
                       </button>
                     </div>
                   </div>
