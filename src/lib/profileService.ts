@@ -16,6 +16,8 @@ export interface StudentProfile {
   totalFocusMins: number;
   explanationsSubmitted: number;
   lastActive: string;
+  lastLoginDate?: string;
+  streakHistory?: string[];
   membershipTier?: "FREE" | "PREMIUM" | "GOLD";
   membershipExpiresAt?: string;
 }
@@ -106,7 +108,9 @@ const DEFAULT_PROFILE: StudentProfile = {
   totalFocusMins: 25,
   explanationsSubmitted: 0,
   lastActive: new Date().toISOString(),
-  membershipTier: "GOLD",
+  lastLoginDate: new Date().toISOString().slice(0, 10),
+  streakHistory: [new Date().toISOString().slice(0, 10)],
+  membershipTier: "FREE",
 };
 
 const INITIAL_EXPLANATIONS: TopicExplanation[] = [
@@ -174,7 +178,130 @@ function saveActivityState(state: StudentActivityState) {
   fs.writeFileSync(ACTIVITY_FILE, JSON.stringify(state, null, 2), "utf8");
 }
 
-export async function getPreservedProfile(): Promise<StudentProfile> {
+export function getCalendarDay(date: Date = new Date(), timeZone: string = "Asia/Kolkata"): string {
+  try {
+    const formatter = new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    return formatter.format(date);
+  } catch {
+    return date.toISOString().slice(0, 10);
+  }
+}
+
+export function getDaysDifference(currentDateStr: string, previousDateStr: string): number {
+  try {
+    const [y1, m1, d1] = currentDateStr.split("-").map(Number);
+    const [y2, m2, d2] = previousDateStr.split("-").map(Number);
+    if (isNaN(y1) || isNaN(m1) || isNaN(d1) || isNaN(y2) || isNaN(m2) || isNaN(d2)) {
+      return 0;
+    }
+    const utc1 = Date.UTC(y1, m1 - 1, d1);
+    const utc2 = Date.UTC(y2, m2 - 1, d2);
+    const msPerDay = 24 * 60 * 60 * 1000;
+    return Math.round((utc1 - utc2) / msPerDay);
+  } catch {
+    return 0;
+  }
+}
+
+export interface StreakEvaluationResult {
+  updatedProfile: StudentProfile;
+  changed: boolean;
+  status: "same_day" | "consecutive_login" | "streak_reset" | "initial_login";
+  streakDays: number;
+  starsAwarded: number;
+}
+
+export function syncDailyLoginStreak(
+  profile: StudentProfile,
+  timeZone: string = "Asia/Kolkata",
+  forcedStreak?: number
+): StreakEvaluationResult {
+  const todayStr = getCalendarDay(new Date(), timeZone);
+  const prevLoginDate = profile.lastLoginDate || (profile.lastActive ? profile.lastActive.slice(0, 10) : undefined);
+
+  let status: StreakEvaluationResult["status"] = "same_day";
+  let newStreak = forcedStreak !== undefined ? forcedStreak : (profile.streakDays || 1);
+  let starsAwarded = 0;
+  let changed = false;
+
+  const currentHistory = Array.isArray(profile.streakHistory) ? [...profile.streakHistory] : [];
+
+  if (forcedStreak !== undefined) {
+    newStreak = forcedStreak;
+    changed = true;
+    if (!currentHistory.includes(todayStr)) {
+      currentHistory.push(todayStr);
+    }
+  } else if (!prevLoginDate) {
+    // Initial login record
+    status = "initial_login";
+    newStreak = Math.max(1, profile.streakDays || 1);
+    starsAwarded = 15;
+    changed = true;
+    if (!currentHistory.includes(todayStr)) {
+      currentHistory.push(todayStr);
+    }
+  } else {
+    const dayDiff = getDaysDifference(todayStr, prevLoginDate);
+
+    if (dayDiff === 0) {
+      // Same calendar day: keep existing streak, no double increment
+      status = "same_day";
+      newStreak = Math.max(1, profile.streakDays || 1);
+      if (!currentHistory.includes(todayStr)) {
+        currentHistory.push(todayStr);
+        changed = true;
+      }
+    } else if (dayDiff === 1) {
+      // Consecutive calendar day! Increment streak and reward daily consistency
+      status = "consecutive_login";
+      newStreak = (profile.streakDays || 0) + 1;
+      starsAwarded = 20;
+      changed = true;
+      if (!currentHistory.includes(todayStr)) {
+        currentHistory.push(todayStr);
+      }
+    } else if (dayDiff > 1) {
+      // Missed at least 1 calendar day: streak resets to 1 (starting fresh today)
+      status = "streak_reset";
+      newStreak = 1;
+      starsAwarded = 10;
+      changed = true;
+      if (!currentHistory.includes(todayStr)) {
+        currentHistory.push(todayStr);
+      }
+    } else {
+      status = "same_day";
+      newStreak = Math.max(1, profile.streakDays || 1);
+    }
+  }
+
+  const trimmedHistory = currentHistory.slice(-60);
+
+  const updatedProfile: StudentProfile = {
+    ...profile,
+    streakDays: newStreak,
+    starsBalance: (profile.starsBalance || 0) + starsAwarded,
+    lastLoginDate: todayStr,
+    lastActive: new Date().toISOString(),
+    streakHistory: trimmedHistory,
+  };
+
+  return {
+    updatedProfile,
+    changed: changed || profile.lastLoginDate !== todayStr,
+    status,
+    streakDays: newStreak,
+    starsAwarded,
+  };
+}
+
+export async function getPreservedProfile(timeZone: string = "Asia/Kolkata"): Promise<StudentProfile> {
   ensureDataDir();
 
   let fileProfile: StudentProfile = DEFAULT_PROFILE;
@@ -196,6 +323,13 @@ export async function getPreservedProfile(): Promise<StudentProfile> {
     fileProfile.avatarUrl = currentAvatar;
   }
 
+  // Evaluate daily login streak
+  const streakEval = syncDailyLoginStreak(fileProfile, timeZone);
+  if (streakEval.changed) {
+    fileProfile = streakEval.updatedProfile;
+    fs.writeFileSync(PROFILE_FILE, JSON.stringify(fileProfile, null, 2), "utf8");
+  }
+
   // Try Supabase sync
   try {
     const { data, error } = await supabase
@@ -210,13 +344,31 @@ export async function getPreservedProfile(): Promise<StudentProfile> {
           ? data.avatar_url
           : undefined;
 
-      return {
+      const mergedProfile: StudentProfile = {
         ...fileProfile,
         fullName: data.full_name || fileProfile.fullName,
-        starsBalance: data.stars_balance ?? fileProfile.starsBalance,
-        streakDays: data.streak_days ?? fileProfile.streakDays,
+        starsBalance: Math.max(data.stars_balance ?? 0, fileProfile.starsBalance),
+        streakDays: fileProfile.streakDays, // keep evaluated streak
+        lastLoginDate: fileProfile.lastLoginDate,
         avatarUrl: currentAvatar || supabaseAvatar || "/images/user-avatar.jpg",
       };
+
+      if (data.streak_days !== fileProfile.streakDays) {
+        supabase
+          .from("profiles")
+          .update({
+            streak_days: fileProfile.streakDays,
+            stars_balance: mergedProfile.starsBalance,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("email", mergedProfile.email)
+          .then(
+            () => {},
+            () => {}
+          );
+      }
+
+      return mergedProfile;
     }
   } catch {
     // Fallback
@@ -225,9 +377,12 @@ export async function getPreservedProfile(): Promise<StudentProfile> {
   return fileProfile;
 }
 
-export async function updatePreservedProfile(updates: Partial<StudentProfile>): Promise<StudentProfile> {
+export async function updatePreservedProfile(
+  updates: Partial<StudentProfile>,
+  timeZone: string = "Asia/Kolkata"
+): Promise<StudentProfile> {
   ensureDataDir();
-  const current = await getPreservedProfile();
+  const current = await getPreservedProfile(timeZone);
 
   // If updates specifies default svg or is undefined, preserve the uploaded/custom avatar
   let nextAvatar = updates.avatarUrl !== undefined ? updates.avatarUrl : current.avatarUrl;
@@ -237,12 +392,19 @@ export async function updatePreservedProfile(updates: Partial<StudentProfile>): 
       : "/images/user-avatar.jpg";
   }
 
-  const updated: StudentProfile = {
+  const merged: StudentProfile = {
     ...current,
     ...updates,
     avatarUrl: nextAvatar,
     lastActive: new Date().toISOString(),
   };
+
+  const streakEval = syncDailyLoginStreak(
+    merged,
+    timeZone,
+    updates.streakDays !== undefined ? updates.streakDays : undefined
+  );
+  const updated = streakEval.updatedProfile;
 
   fs.writeFileSync(PROFILE_FILE, JSON.stringify(updated, null, 2), "utf8");
 
@@ -492,11 +654,14 @@ export async function resetStudentRecordsToZero(): Promise<StudentProfile> {
   };
   saveActivityState(cleanState);
 
+  const todayStr = getCalendarDay(new Date(), "Asia/Kolkata");
   const cleanProfile = await updatePreservedProfile({
     streakDays: 1,
     starsBalance: 0,
     totalFocusMins: 0,
     explanationsSubmitted: 0,
+    lastLoginDate: todayStr,
+    streakHistory: [todayStr],
   });
 
   return cleanProfile;

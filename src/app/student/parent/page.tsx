@@ -65,7 +65,7 @@ export default function ParentDashboardPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
           <div className="bg-[#3D4425]/60 p-3.5 rounded-2xl border border-[#69704A]/20 text-center">
-            <div className="text-2xl font-bold font-display text-[#C8A95B]">12 Days</div>
+            <div className="text-2xl font-bold font-display text-[#C8A95B]">{profile?.streakDays ?? 1} Days</div>
             <div className="text-[10px] text-[#D9CAA8]/70 font-mono font-bold uppercase">Study Streak</div>
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BookOpen,
   CheckCircle2,
@@ -57,9 +57,19 @@ const INITIAL_TASKS: StudyPlanItem[] = [
 
 export default function StudyPlannerPage() {
   const [tasks, setTasks] = useState<StudyPlanItem[]>(INITIAL_TASKS);
+  const [streakDays, setStreakDays] = useState<number>(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTopic, setNewTopic] = useState("");
   const [newSubject, setNewSubject] = useState("Physics");
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.profile?.streakDays) setStreakDays(data.profile.streakDays);
+      })
+      .catch(() => {});
+  }, []);
 
   const toggleTask = (id: string) => {
     setTasks((prev) =>
@@ -126,7 +136,7 @@ export default function StudyPlannerPage() {
             {completedCount} of {tasks.length} Planned Sessions Completed
           </h2>
           <p className="text-xs text-[#D9CAA8]/80 max-w-lg">
-            Completing all planned sessions today earns <strong className="text-[#C8A95B]">+100 BEYOND Stars ⭐</strong> and protects your 12-day streak.
+            Completing all planned sessions today earns <strong className="text-[#C8A95B]">+100 BEYOND Stars ⭐</strong> and protects your {streakDays}-day streak.
           </p>
         </div>
 

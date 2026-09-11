@@ -61,9 +61,28 @@ const INITIAL_BLOCKS: StudyBlock[] = [
 
 export function DailyFocusSchedule() {
   const [blocks, setBlocks] = useState<StudyBlock[]>(INITIAL_BLOCKS);
+  const [streakDays, setStreakDays] = useState<number>(1);
 
   // Load from localStorage on mount and listen to real-time updates
   useEffect(() => {
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.profile?.streakDays) setStreakDays(data.profile.streakDays);
+      })
+      .catch(() => {});
+
+    const handleProfileUpdate = () => {
+      fetch("/api/profile")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.profile?.streakDays) setStreakDays(data.profile.streakDays);
+        })
+        .catch(() => {});
+    };
+
+    window.addEventListener("beyond:activity-updated", handleProfileUpdate);
+
     try {
       const saved = localStorage.getItem(STORAGE_KEY_TASKS);
       if (saved) {
@@ -98,6 +117,7 @@ export function DailyFocusSchedule() {
     window.addEventListener("beyond:task-updated", handleTaskUpdated);
     return () => {
       window.removeEventListener("beyond:task-updated", handleTaskUpdated);
+      window.removeEventListener("beyond:activity-updated", handleProfileUpdate);
     };
   }, []);
 
@@ -165,7 +185,7 @@ export function DailyFocusSchedule() {
             <div className="h-6 w-px bg-[#E1DDD2]" />
             <div>
               <span className="text-[#556052] block text-[10px] uppercase">Day Streak</span>
-              <span className="font-bold text-[#B07D4F]">12 Days</span>
+              <span className="font-bold text-[#B07D4F]">{streakDays} Days</span>
             </div>
           </div>
         </div>

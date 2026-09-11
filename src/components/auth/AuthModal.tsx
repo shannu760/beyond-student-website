@@ -130,7 +130,10 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
         try {
           const res = await fetch("/api/profile", {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+              "Content-Type": "application/json",
+              "x-timezone": typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "Asia/Kolkata"
+            },
             body: JSON.stringify(syncPayload),
           });
           const json = await res.json();
@@ -233,7 +236,10 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, currentProfile }: Au
     try {
       const res = await fetch("/api/profile", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-timezone": typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "Asia/Kolkata"
+        },
         body: JSON.stringify({
           fullName: presetName,
           email: presetEmail,

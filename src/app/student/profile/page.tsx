@@ -59,6 +59,8 @@ interface StudentProfile {
   totalFocusMins: number;
   explanationsSubmitted: number;
   lastActive: string;
+  lastLoginDate?: string;
+  streakHistory?: string[];
   membershipTier?: MembershipTier;
   membershipExpiresAt?: string;
 }
@@ -802,13 +804,19 @@ export default function StudentProfilePage() {
             </div>
           </div>
 
-          <div className="bg-[#364A33]/70 p-3.5 rounded-2xl border border-[#6C7D64]/30 space-y-0.5">
+          <div
+            className="bg-[#364A33]/70 p-3.5 rounded-2xl border border-[#6C7D64]/30 space-y-0.5 cursor-help"
+            title={`Active Daily Study Streak: ${profile?.streakDays ?? 1} Days. Last Login: ${profile?.lastLoginDate || "Today"}`}
+          >
             <div className="text-2xl font-bold font-serif text-amber-400 flex items-center justify-center gap-1.5">
               <Flame className="w-5 h-5 fill-amber-400 text-amber-400" />
               <span>{profile?.streakDays ?? 1} Days</span>
             </div>
-            <div className="text-[10px] uppercase font-mono text-[#F0EDE4]/70 font-bold tracking-wider">
-              Daily Study Streak
+            <div className="text-[10px] uppercase font-mono text-[#F0EDE4]/70 font-bold tracking-wider flex items-center justify-center gap-1.5">
+              <span>Daily Study Streak</span>
+              {profile?.lastLoginDate && (
+                <span className="text-[9px] text-emerald-400 font-mono font-normal tracking-normal">● Active Today</span>
+              )}
             </div>
           </div>
 

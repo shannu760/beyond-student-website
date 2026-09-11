@@ -115,7 +115,10 @@ export default function StudentLayout({
           </Link>
 
           {/* Streaks Pill */}
-          <div className="flex items-center gap-1.5 bg-[#364A33] px-3 py-1.5 rounded border border-[#6C7D64]/40 text-xs font-semibold text-[#F7F5F0] shadow-sm">
+          <div
+            className="flex items-center gap-1.5 bg-[#364A33] px-3 py-1.5 rounded border border-[#6C7D64]/40 text-xs font-semibold text-[#F7F5F0] shadow-sm cursor-help"
+            title={`Daily Study Streak: ${profile?.streakDays ?? 1} Days active. Synced daily on login.`}
+          >
             <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
             <span className="hidden sm:inline font-mono">{profile?.streakDays ?? 1} Days</span>
           </div>

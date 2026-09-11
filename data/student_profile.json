@@ -7,11 +7,15 @@
   "authProvider": "google",
   "classLevel": "Class 12",
   "targetExam": "JEE Main & Advanced 2027",
-  "streakDays": 1,
-  "starsBalance": 141,
+  "streakDays": 2,
+  "starsBalance": 161,
   "totalFocusMins": 30,
   "explanationsSubmitted": 0,
-  "lastActive": "2026-09-10T13:24:22.295Z",
-  "membershipTier": "GOLD",
-  "membershipExpiresAt": "2026-12-07T10:01:51.992Z"
+  "lastActive": "2026-09-11T17:50:36.000Z",
+  "lastLoginDate": "2026-09-11",
+  "streakHistory": [
+    "2026-09-10",
+    "2026-09-11"
+  ],
+  "membershipTier": "FREE"
 }
