@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Code2,
   ChevronRight,
@@ -16,7 +16,15 @@ import {
   Star,
   GraduationCap,
   PlayCircle,
-  Target
+  Target,
+  Sparkles,
+  Lightbulb,
+  Bug,
+  Send,
+  Loader2,
+  Terminal,
+  FileCode,
+  HelpCircle
 } from "lucide-react";
 
 interface Exercise {
@@ -512,6 +520,26 @@ export default function SkillAssessmentsPage() {
   const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
   const [filter, setFilter] = useState<"All" | "Easy" | "Medium" | "Hard">("All");
 
+  // CodeAI Modal State
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<"hint" | "tutor" | "debug">("hint");
+  const [targetProblem, setTargetProblem] = useState("Arrays — Two Sum (LeetCode #1)");
+  const [hintLevel, setHintLevel] = useState<1 | 2 | 3>(1);
+  const [aiOutput, setAiOutput] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [tutorQuery, setTutorQuery] = useState("");
+  const [codeSnippet, setCodeSnippet] = useState(
+`# Paste your Python or JavaScript code here to review:
+def two_sum(nums, target):
+    seen = {}
+    for i in range(len(nums)):
+        diff = target - nums[i]
+        if diff in seen:
+            return [seen[diff], i]
+        seen[nums[i]] = i
+    return []`
+  );
+
   const filteredExercises = activeSkill?.exercises.filter(
     (ex) => filter === "All" || ex.difficulty === filter
   ) ?? [];
@@ -531,6 +559,54 @@ export default function SkillAssessmentsPage() {
     return c.project;
   };
 
+  // Fetch CodeAI Guidance
+  const fetchCodeAi = async (mode: "hint" | "explain" | "debug", lvl: 1 | 2 | 3 = hintLevel, problem = targetProblem, queryText = tutorQuery) => {
+    setAiLoading(true);
+    setAiOutput(null);
+    try {
+      const res = await fetch("/api/ai/code-coach", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problemTitle: problem,
+          mode,
+          hintLevel: lvl,
+          query: queryText,
+          codeSnippet: mode === "debug" ? codeSnippet : undefined
+        })
+      });
+      const data = await res.json();
+      if (data?.content) {
+        setAiOutput(data.content);
+      } else {
+        setAiOutput("Could not generate response. Please try again.");
+      }
+    } catch (err) {
+      setAiOutput("CodeAI service temporarily unavailable.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Open Hint for Specific Exercise
+  const openHintForProblem = (problemTitle: string) => {
+    setTargetProblem(problemTitle);
+    setActiveTab("hint");
+    setHintLevel(1);
+    setIsAiModalOpen(true);
+    fetchCodeAi("hint", 1, problemTitle);
+  };
+
+  // Lock scroll when modal is open
+  useEffect(() => {
+    if (isAiModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [isAiModalOpen]);
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
       {/* Header */}
@@ -546,8 +622,55 @@ export default function SkillAssessmentsPage() {
             </span>
           </div>
           <p className="text-xs text-[#69704A] mt-1">
-            Click any skill card to access real exercises from python.org, LeetCode, HackerRank, Coursera & more.
+            Build practical programming skills with official python.org exercises, Three.js 3D web, and LeetCode DSA.
           </p>
+        </div>
+
+        {/* CodeAI Action Button */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setIsAiModalOpen(true);
+              setActiveTab("tutor");
+              if (!aiOutput) fetchCodeAi("explain", 1, undefined, "How should I structure my daily coding practice?");
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#252B18] text-[#F7F5F0] hover:bg-[#3D4425] rounded-full text-xs font-mono font-bold transition-all shadow-sm"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#C8A95B]" />
+            <span>CodeAI Coach & Debugger</span>
+          </button>
+        </div>
+      </div>
+
+      {/* CodeAI Highlight Banner */}
+      <div className="p-4 rounded-3xl bg-gradient-to-r from-[#252B18] to-[#3D4425] text-[#F7F5F0] shadow-sm border border-[#3D4425]/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-[10px] font-mono uppercase tracking-widest text-[#C8A95B] font-bold">
+              BEYOND CodeAI Assistant
+            </span>
+          </div>
+          <h3 className="font-display font-bold text-base text-white">
+            Stuck on a problem or need a hint without full spoilers?
+          </h3>
+          <p className="text-xs text-stone-300">
+            Get progressive hints (Level 1 Intuition → Level 2 Algorithm → Level 3 Code) or review your solution with AI.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <button
+            onClick={() => openHintForProblem("Arrays — Two Sum (LeetCode #1)")}
+            className="px-3 py-1.5 rounded-full text-[11px] font-mono font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-colors"
+          >
+            Two Sum Hint
+          </button>
+          <button
+            onClick={() => openHintForProblem("Three.js Official Manual — Fundamentals")}
+            className="px-3 py-1.5 rounded-full text-[11px] font-mono font-medium bg-[#C8A95B] text-[#252B18] hover:bg-[#b89849] font-bold transition-colors"
+          >
+            3D Scene Setup →
+          </button>
         </div>
       </div>
 
@@ -670,53 +793,79 @@ export default function SkillAssessmentsPage() {
           {/* Exercise Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {filteredExercises.map((ex, idx) => (
-              <a
+              <div
                 key={idx}
-                href={ex.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex flex-col bg-[#F8F4EC] border border-[#3D4425]/15 rounded-2xl p-4 hover:border-[#3D4425]/40 hover:shadow-md transition-all"
+                className="group flex flex-col justify-between bg-[#F8F4EC] border border-[#3D4425]/15 rounded-2xl p-4 hover:border-[#3D4425]/40 hover:shadow-md transition-all"
               >
-                {/* Top row */}
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${getDifficultyStyle(ex.difficulty, activeSkill.color)}`}>
-                      {ex.difficulty}
-                    </span>
-                    <span className={`text-[9px] font-mono px-2 py-0.5 rounded border ${getTypeStyle(ex.type, activeSkill.color)}`}>
-                      {ex.type}
-                    </span>
-                    {ex.free && (
-                      <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded">
-                        FREE
+                <div>
+                  {/* Top row */}
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${getDifficultyStyle(ex.difficulty, activeSkill.color)}`}>
+                        {ex.difficulty}
                       </span>
-                    )}
+                      <span className={`text-[9px] font-mono px-2 py-0.5 rounded border ${getTypeStyle(ex.type, activeSkill.color)}`}>
+                        {ex.type}
+                      </span>
+                      {ex.free && (
+                        <span className="text-[9px] font-mono bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded">
+                          FREE
+                        </span>
+                      )}
+                    </div>
+                    <a
+                      href={ex.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#3D4425]/40 hover:text-[#3D4425] p-1"
+                      title="Open source"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
                   </div>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#3D4425]/30 group-hover:text-[#3D4425] transition-colors shrink-0" />
+
+                  {/* Title */}
+                  <a
+                    href={ex.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-display font-bold text-sm text-[#252B18] leading-snug hover:text-[#C8A95B] transition-colors block"
+                  >
+                    {ex.title}
+                  </a>
+
+                  {/* Description */}
+                  <p className="text-[11px] text-[#69704A] mt-1.5 leading-relaxed">
+                    {ex.description}
+                  </p>
                 </div>
 
-                {/* Title */}
-                <h4 className="font-display font-bold text-sm text-[#252B18] leading-snug group-hover:text-[#3D4425] transition-colors">
-                  {ex.title}
-                </h4>
-
-                {/* Description */}
-                <p className="text-[11px] text-[#69704A] mt-1.5 leading-relaxed flex-1">
-                  {ex.description}
-                </p>
-
-                {/* Footer */}
+                {/* Footer with AI Hint button */}
                 <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-[#3D4425]/10">
                   <div className="flex items-center gap-1.5 text-[10px] text-[#69704A]">
                     <GraduationCap className="w-3 h-3" />
                     <span className="font-mono">{ex.source}</span>
                   </div>
-                  <div className="flex items-center gap-1 text-[10px] text-[#69704A]">
-                    <Clock className="w-3 h-3" />
-                    <span>{ex.estimatedTime}</span>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openHintForProblem(ex.title);
+                      }}
+                      className="flex items-center gap-1 text-[10px] font-mono font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 px-2.5 py-0.5 rounded-full border border-amber-300 transition-colors"
+                    >
+                      <Lightbulb className="w-3 h-3 text-amber-700" />
+                      <span>AI Hint</span>
+                    </button>
+                    <div className="flex items-center gap-1 text-[10px] text-[#69704A]">
+                      <Clock className="w-3 h-3" />
+                      <span>{ex.estimatedTime}</span>
+                    </div>
                   </div>
                 </div>
-              </a>
+              </div>
             ))}
           </div>
 
@@ -727,6 +876,211 @@ export default function SkillAssessmentsPage() {
           )}
         </div>
       )}
+
+      {/* ── CODEAI MODAL & PLAYGROUND ── */}
+      {isAiModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[#F8F4EC] rounded-3xl border border-[#3D4425]/20 shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-[#3D4425]/10 bg-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center text-violet-800">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-base text-[#252B18]">CodeAI Coding Coach</h3>
+                  <p className="text-[11px] text-[#69704A]">Python, Three.js & DSA Reasoning Engine</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsAiModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-[#3D4425]/10 hover:bg-[#3D4425]/20 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4 text-[#3D4425]" />
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-[#3D4425]/10 bg-stone-50 px-5 pt-2 gap-2">
+              <button
+                onClick={() => {
+                  setActiveTab("hint");
+                  fetchCodeAi("hint", hintLevel, targetProblem);
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-mono font-bold border-b-2 transition-all ${
+                  activeTab === "hint"
+                    ? "border-[#252B18] text-[#252B18]"
+                    : "border-transparent text-[#69704A] hover:text-[#252B18]"
+                }`}
+              >
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span>Progressive Hint</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("tutor");
+                  if (!aiOutput) fetchCodeAi("explain", 1, undefined, tutorQuery || "Explain Python list comprehensions");
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-mono font-bold border-b-2 transition-all ${
+                  activeTab === "tutor"
+                    ? "border-[#252B18] text-[#252B18]"
+                    : "border-transparent text-[#69704A] hover:text-[#252B18]"
+                }`}
+              >
+                <Terminal className="w-3.5 h-3.5" />
+                <span>Concept Tutor</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("debug");
+                  fetchCodeAi("debug");
+                }}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-mono font-bold border-b-2 transition-all ${
+                  activeTab === "debug"
+                    ? "border-[#252B18] text-[#252B18]"
+                    : "border-transparent text-[#69704A] hover:text-[#252B18]"
+                }`}
+              >
+                <Bug className="w-3.5 h-3.5" />
+                <span>Code Debugger</span>
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto space-y-4 flex-1">
+              {/* Tab 1: Progressive Hint */}
+              {activeTab === "hint" && (
+                <div className="space-y-4">
+                  <div className="p-3.5 rounded-2xl bg-white border border-[#3D4425]/15">
+                    <div className="text-[10px] font-mono text-[#69704A] uppercase font-bold">Target Exercise:</div>
+                    <div className="text-sm font-bold text-[#252B18] mt-0.5">{targetProblem}</div>
+                  </div>
+
+                  {/* 3-Level Hint Selector */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-[#252B18]">Hint Level:</span>
+                    {([1, 2, 3] as const).map((lvl) => (
+                      <button
+                        key={lvl}
+                        onClick={() => {
+                          setHintLevel(lvl);
+                          fetchCodeAi("hint", lvl, targetProblem);
+                        }}
+                        className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-mono font-bold border transition-all ${
+                          hintLevel === lvl
+                            ? "bg-[#252B18] text-white border-[#252B18]"
+                            : "bg-white text-[#3D4425] border-[#3D4425]/20 hover:border-[#3D4425]"
+                        }`}
+                      >
+                        {lvl === 1 && "Level 1: Intuition"}
+                        {lvl === 2 && "Level 2: Algorithm"}
+                        {lvl === 3 && "Level 3: Full Code"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Concept Tutor */}
+              {activeTab === "tutor" && (
+                <div className="space-y-3">
+                  <div className="text-xs text-[#69704A]">Ask any concept in Python, Three.js 3D math, or DSA:</div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "How does Three.js render loop work?",
+                      "Two Sum hash map logic explained",
+                      "Difference between Lists and Tuples in Python",
+                      "How to write a basic GLSL fragment shader?"
+                    ].map((q, qi) => (
+                      <button
+                        key={qi}
+                        onClick={() => {
+                          setTutorQuery(q);
+                          fetchCodeAi("explain", 1, undefined, q);
+                        }}
+                        className="text-[10px] text-left px-2.5 py-1 rounded-full bg-white border border-[#3D4425]/15 hover:border-[#3D4425] text-[#3D4425] transition-all"
+                      >
+                        {q}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={tutorQuery}
+                      onChange={(e) => setTutorQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") fetchCodeAi("explain", 1, undefined, tutorQuery);
+                      }}
+                      placeholder="Ask CodeAI a question (e.g. 'Explain binary search recursive vs iterative')..."
+                      className="flex-1 px-3 py-1.5 rounded-xl border border-[#3D4425]/20 text-xs focus:outline-none focus:ring-1 focus:ring-[#3D4425]"
+                    />
+                    <button
+                      onClick={() => fetchCodeAi("explain", 1, undefined, tutorQuery)}
+                      disabled={aiLoading || !tutorQuery.trim()}
+                      className="px-4 py-1.5 bg-[#252B18] text-white text-xs font-mono font-bold rounded-xl disabled:opacity-40"
+                    >
+                      Ask
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Code Debugger */}
+              {activeTab === "debug" && (
+                <div className="space-y-3">
+                  <div className="text-xs text-[#69704A]">Paste your code snippet below to review for bugs and edge cases:</div>
+                  <textarea
+                    rows={6}
+                    value={codeSnippet}
+                    onChange={(e) => setCodeSnippet(e.target.value)}
+                    className="w-full p-3 font-mono text-xs bg-white rounded-2xl border border-[#3D4425]/20 focus:outline-none focus:ring-1 focus:ring-[#3D4425]"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => fetchCodeAi("debug")}
+                      disabled={aiLoading}
+                      className="flex items-center gap-1.5 px-4 py-1.5 bg-[#252B18] hover:bg-[#3D4425] text-white text-xs font-mono font-bold rounded-xl transition-colors"
+                    >
+                      <Bug className="w-3.5 h-3.5 text-red-400" />
+                      <span>Analyze Code for Bugs</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {aiLoading && (
+                <div className="flex items-center justify-center py-8 gap-2 text-[#69704A] text-xs">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#3D4425]" />
+                  <span>CodeAI is reasoning through code structures…</span>
+                </div>
+              )}
+
+              {/* AI Output Display */}
+              {aiOutput && !aiLoading && (
+                <div className="p-4 rounded-2xl bg-white border border-[#3D4425]/15 space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-[#69704A] border-b border-[#3D4425]/10 pb-1.5">
+                    <span className="flex items-center gap-1 text-violet-800 font-bold">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> CodeAI Analysis
+                    </span>
+                    <span>Algorithms & Syntax Engine</span>
+                  </div>
+                  <div className="text-xs text-[#252B18] leading-relaxed whitespace-pre-wrap font-sans">
+                    {aiOutput}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-3.5 bg-white border-t border-[#3D4425]/10 text-center text-[10px] text-[#69704A]">
+              CodeAI guides your problem-solving process without depriving you of the learning journey.
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
