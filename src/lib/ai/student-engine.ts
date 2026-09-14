@@ -105,6 +105,37 @@ export async function generateStudentAIResponse(
   let citations: StudentChatMessage["citations"] = [];
   let suggestedActions: string[] = [];
 
+  // Query BEYOND Intelligence Layer (Hybrid BM25 + Vector RRF + Provenance Audit)
+  try {
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/intelligence", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: userQuery,
+          studentContext: {
+            student_id: context.studentId,
+            class_level: context.classLevel,
+            target_exam: context.targetExam,
+            weak_topics: context.weakTopics.map(t => ({ topic: t, mastery: 0.5, source: "assessment" }))
+          }
+        })
+      });
+      if (res.ok) {
+        const intelResult = await res.json();
+        if (intelResult.success && intelResult.evidenceSufficient && intelResult.citations?.length > 0) {
+          citations = intelResult.citations.map((c: any) => ({
+            sourceName: `${c.organization || c.source_name || "Official Authority"} (${c.authority_tier === "AUTHORITATIVE" ? "Tier 1: Verified" : "Tier 2"})`,
+            sourceUrl: c.url,
+            snippet: c.section ? `Section: ${c.section}` : "Verified against official regulatory and educational knowledge records."
+          }));
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Intelligence Hub query error in student-engine:", err);
+  }
+
   if (queryLower.includes("scholarship") || queryLower.includes("financial")) {
     responseContent = `Here are the official verified scholarship schemes matching your profile (${context.classLevel}, Target: ${context.targetExam}):
 
@@ -121,13 +152,15 @@ export async function generateStudentAIResponse(
 
 > **Advice**: Make sure your Income Certificate and Domicile Certificate are renewed for AY 2026-27 before the deadline.`;
 
-    citations = [
-      {
-        sourceName: "National Scholarship Portal (NSP AY 2026-27)",
-        sourceUrl: "https://scholarships.gov.in/",
-        snippet: "Official scholarship scheme applications and One-Time Registration (OTR) guide for AY 2026-27."
-      }
-    ];
+    if (!citations || citations.length === 0) {
+      citations = [
+        {
+          sourceName: "National Scholarship Portal (NSP AY 2026-27) [Tier 1: Authoritative]",
+          sourceUrl: "https://scholarships.gov.in/",
+          snippet: "Official scholarship scheme applications and One-Time Registration (OTR) guide for AY 2026-27."
+        }
+      ];
+    }
 
     suggestedActions = [
       "View Matched Scholarships in Radar",
